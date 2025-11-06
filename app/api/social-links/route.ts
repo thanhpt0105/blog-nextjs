@@ -10,12 +10,14 @@ const socialLinkSchema = z.object({
   visible: z.boolean().default(true),
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const links = await prisma.socialLink.findMany({
+    // Public endpoint - no auth required for reading
+    const socialLinks = await prisma.socialLink.findMany({
       orderBy: { order: 'asc' },
     });
-    return NextResponse.json(links);
+
+    return NextResponse.json(socialLinks);
   } catch (error) {
     console.error('Get social links error:', error);
     return NextResponse.json(

@@ -1,16 +1,66 @@
 'use client';
 
-import * as React from 'react';
+import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
+import IconButton from '@mui/material/IconButton';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import IconButton from '@mui/material/IconButton';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import LinkIcon from '@mui/icons-material/Link';
+
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  icon: string;
+  visible: boolean;
+}
+
+const getPlatformIcon = (platform: string) => {
+  const platformLower = platform.toLowerCase();
+  switch (platformLower) {
+    case 'github':
+      return <GitHubIcon />;
+    case 'twitter':
+    case 'x':
+      return <TwitterIcon />;
+    case 'linkedin':
+      return <LinkedInIcon />;
+    case 'facebook':
+      return <FacebookIcon />;
+    case 'instagram':
+      return <InstagramIcon />;
+    case 'youtube':
+      return <YouTubeIcon />;
+    default:
+      return <LinkIcon />;
+  }
+};
 
 export function Footer() {
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      try {
+        const response = await fetch('/api/social-links');
+        if (response.ok) {
+          const data = await response.json();
+          setSocialLinks(data.filter((link: SocialLink) => link.visible));
+        }
+      } catch (error) {
+        console.error('Failed to fetch social links:', error);
+      }
+    };
+
+    fetchSocialLinks();
+  }, []);
+
   return (
     <Box
       component="footer"
@@ -38,35 +88,23 @@ export function Footer() {
             © {new Date().getFullYear()} My Blog. All rights reserved.
           </Typography>
           
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <IconButton
-              aria-label="GitHub"
-              color="inherit"
-              href="https://github.com"
-              target="_blank"
-              rel="noopener"
-            >
-              <GitHubIcon />
-            </IconButton>
-            <IconButton
-              aria-label="Twitter"
-              color="inherit"
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener"
-            >
-              <TwitterIcon />
-            </IconButton>
-            <IconButton
-              aria-label="LinkedIn"
-              color="inherit"
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener"
-            >
-              <LinkedInIcon />
-            </IconButton>
-          </Box>
+          {socialLinks.length > 0 && (
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {socialLinks.map((link) => (
+                <IconButton
+                  key={link.id}
+                  aria-label={link.platform}
+                  color="inherit"
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener"
+                  title={link.platform}
+                >
+                  {getPlatformIcon(link.platform)}
+                </IconButton>
+              ))}
+            </Box>
+          )}
         </Box>
       </Container>
     </Box>

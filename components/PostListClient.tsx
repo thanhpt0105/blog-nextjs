@@ -3,6 +3,7 @@
 import { Card, CardContent, CardMedia, Typography, Box, Chip, Grid } from '@mui/material';
 import { CalendarMonth, Person } from '@mui/icons-material';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Post {
   id: string;
@@ -29,18 +30,23 @@ interface PostListClientProps {
 }
 
 export default function PostListClient({ posts }: PostListClientProps) {
+  const router = useRouter();
+
+  const handleCardClick = (slug: string) => {
+    router.push(`/posts/${slug}`);
+  };
+
   return (
     <Grid container spacing={4}>
       {posts.map((post) => (
         <Grid item xs={12} md={6} key={post.id}>
           <Card
-            component={Link}
-            href={`/posts/${post.slug}`}
+            onClick={() => handleCardClick(post.slug)}
             sx={{
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
-              textDecoration: 'none',
+              cursor: 'pointer',
               transition: 'transform 0.2s, box-shadow 0.2s',
               '&:hover': {
                 transform: 'translateY(-4px)',
@@ -96,7 +102,9 @@ export default function PostListClient({ posts }: PostListClientProps) {
                           backgroundColor: 'primary.light',
                         },
                       }}
-                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                      }}
                     />
                   ))}
                 </Box>

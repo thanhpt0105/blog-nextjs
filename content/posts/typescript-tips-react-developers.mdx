@@ -1,0 +1,260 @@
+---
+title: "TypeScript Tips for React Developers"
+date: "2024-02-20"
+excerpt: "Level up your React development with these practical TypeScript tips and patterns. Learn about type inference, generics, and common pitfalls to avoid."
+tags: ["TypeScript", "React", "JavaScript", "Best Practices"]
+author: "Your Name"
+readTime: "10 min read"
+---
+
+# TypeScript Tips for React Developers
+
+TypeScript has become the de facto standard for React development. In this post, we'll explore practical tips and patterns to help you write better, type-safe React code.
+
+## Why TypeScript with React?
+
+Using TypeScript with React provides several benefits:
+
+- 🔒 **Type Safety**: Catch errors at compile time
+- 🧠 **Better IDE Support**: Autocomplete and IntelliSense
+- 📚 **Self-Documenting**: Types serve as documentation
+- 🔧 **Refactoring Confidence**: Rename with confidence
+- 🤝 **Team Collaboration**: Clearer interfaces between components
+
+## Typing React Components
+
+### Functional Components
+
+The modern way to type functional components:
+
+```typescript
+interface ButtonProps {
+  label: string;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary';
+  disabled?: boolean;
+}
+
+const Button: React.FC<ButtonProps> = ({ 
+  label, 
+  onClick, 
+  variant = 'primary',
+  disabled = false 
+}) => {
+  return (
+    <button 
+      onClick={onClick} 
+      disabled={disabled}
+      className={`btn btn-${variant}`}
+    >
+      {label}
+    </button>
+  );
+};
+```
+
+### Props with Children
+
+```typescript
+interface CardProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+const Card: React.FC<CardProps> = ({ title, children }) => {
+  return (
+    <div className="card">
+      <h2>{title}</h2>
+      {children}
+    </div>
+  );
+};
+```
+
+## Advanced Patterns
+
+### Generic Components
+
+Create reusable components with generics:
+
+```typescript
+interface ListProps<T> {
+  items: T[];
+  renderItem: (item: T) => React.ReactNode;
+}
+
+function List<T>({ items, renderItem }: ListProps<T>) {
+  return (
+    <ul>
+      {items.map((item, index) => (
+        <li key={index}>{renderItem(item)}</li>
+      ))}
+    </ul>
+  );
+}
+
+// Usage
+<List 
+  items={users} 
+  renderItem={(user) => <span>{user.name}</span>}
+/>
+```
+
+### Discriminated Unions
+
+Type-safe state management:
+
+```typescript
+type LoadingState<T> =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: Error };
+
+function DataDisplay<T>({ state }: { state: LoadingState<T> }) {
+  switch (state.status) {
+    case 'idle':
+      return <div>Ready to load</div>;
+    case 'loading':
+      return <div>Loading...</div>;
+    case 'success':
+      return <div>Data: {JSON.stringify(state.data)}</div>;
+    case 'error':
+      return <div>Error: {state.error.message}</div>;
+  }
+}
+```
+
+## Event Handlers
+
+Type event handlers correctly:
+
+```typescript
+const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  console.log(event.target.value);
+};
+
+const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  event.preventDefault();
+  // Handle click
+};
+
+const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  // Handle submit
+};
+```
+
+## Hooks with TypeScript
+
+### useState
+
+```typescript
+// Type inference
+const [count, setCount] = useState(0);
+
+// Explicit typing
+const [user, setUser] = useState<User | null>(null);
+
+// With initial value
+const [items, setItems] = useState<string[]>([]);
+```
+
+### useRef
+
+```typescript
+const inputRef = useRef<HTMLInputElement>(null);
+
+// Usage
+const focusInput = () => {
+  inputRef.current?.focus();
+};
+```
+
+### Custom Hooks
+
+```typescript
+interface UseApiResult<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+}
+
+function useApi<T>(url: string): UseApiResult<T> {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    fetch(url)
+      .then(res => res.json())
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, [url]);
+
+  return { data, loading, error };
+}
+```
+
+## Common Pitfalls
+
+### 1. Avoid `any`
+
+```typescript
+// ❌ Bad
+const processData = (data: any) => {
+  // No type safety
+};
+
+// ✅ Good
+const processData = (data: unknown) => {
+  if (typeof data === 'string') {
+    // Now TypeScript knows it's a string
+  }
+};
+```
+
+### 2. Use Type Guards
+
+```typescript
+function isUser(obj: any): obj is User {
+  return 'id' in obj && 'name' in obj;
+}
+
+if (isUser(data)) {
+  // TypeScript knows data is User here
+  console.log(data.name);
+}
+```
+
+### 3. Leverage Utility Types
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+}
+
+// Pick only needed properties
+type PublicUser = Pick<User, 'id' | 'name'>;
+
+// Omit sensitive properties
+type SafeUser = Omit<User, 'password'>;
+
+// Make all properties optional
+type PartialUser = Partial<User>;
+
+// Make all properties required
+type RequiredUser = Required<User>;
+```
+
+## Conclusion
+
+TypeScript enhances React development by providing type safety, better tooling, and improved code quality. Start with basic typing and gradually adopt more advanced patterns as you become comfortable.
+
+Remember: the goal is to make your code more maintainable, not to fight with the type system. Use `unknown` instead of `any`, leverage type inference, and don't be afraid to use utility types.
+
+Happy typing! 🎯

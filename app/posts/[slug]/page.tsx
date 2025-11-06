@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface PostPageProps {
   params: {
@@ -126,14 +127,24 @@ export default async function PostPage({ params }: PostPageProps) {
               mb: 4,
               borderRadius: 2,
               overflow: 'hidden',
-              '& img': {
+              position: 'relative',
+              width: '100%',
+              height: 'auto',
+            }}
+          >
+            <img 
+              src={post.coverImage} 
+              alt={post.title}
+              style={{
                 width: '100%',
                 height: 'auto',
                 display: 'block',
-              },
-            }}
-          >
-            <img src={post.coverImage} alt={post.title} />
+              }}
+              onError={(e) => {
+                // Hide image if it fails to load
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           </Box>
         )}
 
@@ -195,6 +206,7 @@ export default async function PostPage({ params }: PostPageProps) {
               height: 'auto',
               borderRadius: 1,
               my: 2,
+              display: 'block',
             },
             '& hr': {
               my: 4,
@@ -219,7 +231,35 @@ export default async function PostPage({ params }: PostPageProps) {
             },
           }}
         >
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            components={{
+              img: ({ node, ...props }) => (
+                <img
+                  {...props}
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    borderRadius: '8px',
+                    display: 'block',
+                    margin: '16px 0',
+                  }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    // Show alt text or placeholder
+                    const alt = target.alt || 'Image failed to load';
+                    const placeholder = document.createElement('div');
+                    placeholder.style.cssText = 'padding: 20px; background: rgba(0,0,0,0.05); border-radius: 8px; text-align: center; color: rgba(0,0,0,0.5); margin: 16px 0;';
+                    placeholder.textContent = alt;
+                    target.parentNode?.replaceChild(placeholder, target);
+                  }}
+                />
+              ),
+            }}
+          >
+            {post.content}
+          </ReactMarkdown>
         </Box>
       </Box>
     </Container>

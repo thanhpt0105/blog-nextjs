@@ -61,6 +61,10 @@ export default function PostListClient({ posts }: PostListClientProps) {
                 image={post.coverImage}
                 alt={post.title}
                 sx={{ objectFit: 'cover' }}
+                onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                  // Hide the image if it fails to load
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             )}
             <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>

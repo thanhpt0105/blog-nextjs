@@ -62,6 +62,9 @@ export default async function AdminPage() {
   }
 
   const stats = await getDashboardStats();
+  
+  // Determine which stats to show based on role
+  const isAdmin = session.user.role === 'ADMIN';
 
   const statCards = [
     {
@@ -85,13 +88,14 @@ export default async function AdminPage() {
       color: 'warning.main',
       bgColor: 'warning.light',
     },
-    {
+    // Only show Users stat for admins
+    ...(isAdmin ? [{
       title: 'Users',
       value: stats.totalUsers,
       icon: <People sx={{ fontSize: 40 }} />,
       color: 'info.main',
       bgColor: 'info.light',
-    },
+    }] : []),
   ];
 
   return (
@@ -119,7 +123,7 @@ export default async function AdminPage() {
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {statCards.map((stat) => (
-          <Grid item xs={12} sm={6} md={3} key={stat.title}>
+          <Grid item xs={12} sm={6} md={isAdmin ? 3 : 4} key={stat.title}>
             <Card>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

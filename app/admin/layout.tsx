@@ -36,13 +36,13 @@ import Link from 'next/link';
 
 const drawerWidth = 260;
 
-const menuItems = [
-  { text: 'Dashboard', icon: <Dashboard />, href: '/admin' },
-  { text: 'Blog Posts', icon: <Article />, href: '/admin/posts' },
-  { text: 'Tags', icon: <Label />, href: '/admin/tags' },
-  { text: 'Users', icon: <People />, href: '/admin/users' },
-  { text: 'Settings', icon: <Settings />, href: '/admin/settings' },
-  { text: 'Social Links', icon: <LinkIcon />, href: '/admin/social-links' },
+const allMenuItems = [
+  { text: 'Dashboard', icon: <Dashboard />, href: '/admin', roles: ['ADMIN', 'EDITOR'] },
+  { text: 'Blog Posts', icon: <Article />, href: '/admin/posts', roles: ['ADMIN', 'EDITOR'] },
+  { text: 'Tags', icon: <Label />, href: '/admin/tags', roles: ['ADMIN', 'EDITOR'] },
+  { text: 'Users', icon: <People />, href: '/admin/users', roles: ['ADMIN'] },
+  { text: 'Settings', icon: <Settings />, href: '/admin/settings', roles: ['ADMIN'] },
+  { text: 'Social Links', icon: <LinkIcon />, href: '/admin/social-links', roles: ['ADMIN'] },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -51,6 +51,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
+
+  const userRole = session?.user?.role || 'USER';
+  
+  // Filter menu items based on user role
+  const menuItems = allMenuItems.filter(item => 
+    item.roles.includes(userRole as 'ADMIN' | 'EDITOR')
+  );
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -139,7 +146,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <Chip
                 label={session.user.role}
                 size="small"
-                color={session.user.role === 'ADMIN' ? 'error' : 'default'}
+                color={session.user.role === 'ADMIN' ? 'error' : session.user.role === 'EDITOR' ? 'primary' : 'default'}
               />
               <IconButton
                 size="large"

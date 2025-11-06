@@ -21,9 +21,17 @@ export default auth((req) => {
     return Response.redirect(loginUrl);
   }
 
-  // Check if user has admin role for admin pages
-  if (isAdminPage && userRole !== 'ADMIN') {
+  // Check if user has admin or editor role for admin pages
+  if (isAdminPage && userRole !== 'ADMIN' && userRole !== 'EDITOR') {
     return Response.redirect(new URL('/', nextUrl));
+  }
+
+  // Restrict certain admin pages to ADMIN only
+  const adminOnlyPages = ['/admin/users', '/admin/settings', '/admin/social-links'];
+  const isAdminOnlyPage = adminOnlyPages.some(page => nextUrl.pathname.startsWith(page));
+  
+  if (isAdminOnlyPage && userRole !== 'ADMIN') {
+    return Response.redirect(new URL('/admin', nextUrl));
   }
 
   return;

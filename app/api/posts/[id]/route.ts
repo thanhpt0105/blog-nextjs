@@ -106,8 +106,12 @@ export async function PUT(
       }
     }
 
-    // Only allow author or admin to edit
-    if (existingPost.authorId !== session.user.id && session.user.role !== 'admin') {
+    // Only allow author, editor, or admin to edit
+    if (
+      existingPost.authorId !== session.user.id && 
+      session.user.role !== 'ADMIN' && 
+      session.user.role !== 'EDITOR'
+    ) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -177,8 +181,12 @@ export async function DELETE(
       );
     }
 
-    // Only allow author or admin to delete
-    if (existingPost.authorId !== session.user.id && session.user.role !== 'admin') {
+    // Only allow author, editor, or admin to delete
+    if (
+      existingPost.authorId !== session.user.id && 
+      session.user.role !== 'ADMIN' && 
+      session.user.role !== 'EDITOR'
+    ) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

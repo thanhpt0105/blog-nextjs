@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Box, Autocomplete, TextField, Chip, Paper, Pagination, Typography } from '@mui/material';
 import { FilterList } from '@mui/icons-material';
 import PostsTable from './PostsTable';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface Post {
   id: string;
@@ -34,12 +35,20 @@ interface Tag {
 interface AdminPostsClientProps {
   posts: Post[];
   tags: Tag[];
-  postsPerPage?: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
-export default function AdminPostsClient({ posts, tags, postsPerPage = 10 }: AdminPostsClientProps) {
+export default function AdminPostsClient({ posts, tags, pagination }: AdminPostsClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter posts based on selected tag
   const filteredPosts = useMemo(() => {
@@ -52,19 +61,20 @@ export default function AdminPostsClient({ posts, tags, postsPerPage = 10 }: Adm
     );
   }, [posts, selectedTag]);
 
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  const startIndex = (currentPage - 1) * postsPerPage;
-  const endIndex = startIndex + postsPerPage;
-  const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+  // If tag filter is active, show filtered results, else use server pagination
+  const hasClientFilter = selectedTag !== null;
+  const displayPosts = hasClientFilter ? filteredPosts : posts;
+  const displayTotal = hasClientFilter ? filteredPosts.length : pagination.total;
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
-    setCurrentPage(value);
+    // Update URL with new page
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', value.toString());
+    router.push(`?${params.toString()}`);
   };
 
   const handleTagChange = (_event: any, newValue: Tag | null) => {
     setSelectedTag(newValue);
-    setCurrentPage(1); // Reset to first page when filter changes
   };
 
   return (
@@ -90,7 +100,7 @@ export default function AdminPostsClient({ posts, tags, postsPerPage = 10 }: Adm
           />
           {selectedTag && (
             <Chip
-              label={`Showing ${filteredPosts.length} of ${posts.length} posts`}
+              label={`Showing ${displayTotal} of ${pagination.total} posts`}
               color="primary"
               variant="outlined"
             />
@@ -99,22 +109,31 @@ export default function AdminPostsClient({ posts, tags, postsPerPage = 10 }: Adm
       </Paper>
 
       {/* Posts Table */}
-      <PostsTable posts={paginatedPosts as any} />
+      <PostsTable posts={displayPosts as any} />
 
-      {/* Pagination */}
-      {totalPages > 1 && (
+      {/* Pagination - only show for server-side pagination (no tag filter) */}
+      {!hasClientFilter && pagination.totalPages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 4, gap: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            Showing {startIndex + 1}-{Math.min(endIndex, filteredPosts.length)} of {filteredPosts.length} posts
+            Page {pagination.page} of {pagination.totalPages} ({pagination.total} total posts)
           </Typography>
           <Pagination
-            count={totalPages}
-            page={currentPage}
+            count={pagination.totalPages}
+            page={pagination.page}
             onChange={handlePageChange}
             color="primary"
             showFirstButton
             showLastButton
           />
+        </Box>
+      )}
+
+      {/* Show info when tag filter is active */}
+      {hasClientFilter && (
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="body2" color="text.secondary">
+            Showing {displayTotal} post{displayTotal !== 1 ? 's' : ''} with tag "{selectedTag?.name}"
+          </Typography>
         </Box>
       )}
     </>

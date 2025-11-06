@@ -1,6 +1,5 @@
 import { auth } from '@/lib/auth-server';
 import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
 import {
   Box,
   Button,
@@ -12,50 +11,33 @@ import {
 import Link from 'next/link';
 import AdminPostsClient from '@/components/admin/AdminPostsClient';
 import { getSiteSettings } from '@/lib/settings';
+import { PostRepository, TagRepository } from '@/lib/repositories';
 
-async function getPosts() {
-  const posts = await prisma.post.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      author: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-      tags: {
-        include: {
-          tag: true,
-        },
-      },
-    },
-  });
-
-  return posts;
+interface AdminPostsPageProps {
+  searchParams: {
+    page?: string;
+  };
 }
 
-async function getAllTags() {
-  const tags = await prisma.tag.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      posts: true,
-    },
-  });
-
-  return tags;
-}
-
-export default async function PostsPage() {
+export default async function PostsPage({ searchParams }: AdminPostsPageProps) {
   const session = await auth();
 
   if (!session) {
     redirect('/login');
   }
 
-  const posts = await getPosts();
-  const tags = await getAllTags();
   const settings = await getSiteSettings();
   const postsPerPage = parseInt(settings.posts_per_page) || 10;
+  const currentPage = parseInt(searchParams.page || '1');
+
+  // Get paginated posts and all tags in parallel
+  const [postsResult, tags] = await Promise.all([
+    PostRepository.getPosts({
+      page: currentPage,
+      limit: postsPerPage,
+    }),
+    TagRepository.getAllTagsAdmin(),
+  ]);
 
   return (
     <Box>
@@ -71,7 +53,11 @@ export default async function PostsPage() {
         </Button>
       </Box>
 
-      <AdminPostsClient posts={posts} tags={tags} postsPerPage={postsPerPage} />
+      <AdminPostsClient 
+        posts={postsResult.data} 
+        tags={tags}
+        pagination={postsResult.pagination}
+      />
     </Box>
   );
 }

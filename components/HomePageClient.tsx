@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Box, Chip, Typography, Button, TextField, InputAdornment, Pagination } from '@mui/material';
 import { Label, Close, Search } from '@mui/icons-material';
 import PostListClient from './PostListClient';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface Post {
   id: string;
@@ -35,15 +36,23 @@ interface Tag {
 interface HomePageClientProps {
   posts: Post[];
   tags: Tag[];
-  postsPerPage?: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
-export default function HomePageClient({ posts, tags, postsPerPage = 10 }: HomePageClientProps) {
+export default function HomePageClient({ posts, tags, pagination }: HomePageClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter posts based on selected tags and search query
+  // Filter posts based on selected tags and search query (client-side)
   const filteredPosts = useMemo(() => {
     let filtered = posts;
 
@@ -74,11 +83,9 @@ export default function HomePageClient({ posts, tags, postsPerPage = 10 }: HomeP
     return filtered;
   }, [posts, selectedTagIds, searchQuery]);
 
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  const startIndex = (currentPage - 1) * postsPerPage;
-  const endIndex = startIndex + postsPerPage;
-  const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+  // If filters are active, use client-side pagination, else use server pagination
+  const hasClientFilters = selectedTagIds.length > 0 || searchQuery.trim().length > 0;
+  const displayPosts = hasClientFilters ? filteredPosts : posts;
 
   // Get tags that have published posts
   const tagsWithPosts = useMemo(() => {
@@ -93,28 +100,32 @@ export default function HomePageClient({ posts, tags, postsPerPage = 10 }: HomeP
         return [...prev, tagId];
       }
     });
-    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const clearAllFilters = () => {
     setSelectedTagIds([]);
     setSearchQuery('');
-    setCurrentPage(1);
   };
 
   const clearSearch = () => {
     setSearchQuery('');
-    setCurrentPage(1);
   };
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
-    setCurrentPage(value);
-    // Scroll to top when page changes
+    // Update URL with new page
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', value.toString());
+    router.push(`?${params.toString()}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const selectedTags = tagsWithPosts.filter(tag => selectedTagIds.includes(tag.id));
   const hasActiveFilters = selectedTagIds.length > 0 || searchQuery.trim().length > 0;
+
+  // Display info
+  const showingTotal = hasClientFilters ? filteredPosts.length : pagination.total;
+  const currentTotalPages = hasClientFilters ? 1 : pagination.totalPages;
+  const currentPage = hasClientFilters ? 1 : pagination.page;
 
   return (
     <>
@@ -161,7 +172,7 @@ export default function HomePageClient({ posts, tags, postsPerPage = 10 }: HomeP
           </Box>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
             <Chip
-              label={`All Posts (${posts.length})`}
+              label={`All Posts (${pagination.total})`}
               onClick={clearAllFilters}
               color={!hasActiveFilters ? 'primary' : 'default'}
               variant={!hasActiveFilters ? 'filled' : 'outlined'}
@@ -189,7 +200,7 @@ export default function HomePageClient({ posts, tags, postsPerPage = 10 }: HomeP
                     : searchQuery 
                     ? 'Search results'
                     : 'Active filters'
-                  } ({filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}):
+                  } ({showingTotal} {showingTotal === 1 ? 'post' : 'posts'}):
                 </Typography>
                 {searchQuery && (
                   <Chip
@@ -224,15 +235,15 @@ export default function HomePageClient({ posts, tags, postsPerPage = 10 }: HomeP
       )}
 
       {/* Posts List */}
-      {filteredPosts.length > 0 ? (
+      {displayPosts.length > 0 ? (
         <>
-          <PostListClient posts={paginatedPosts} />
+          <PostListClient posts={displayPosts} />
           
-          {/* Pagination */}
-          {totalPages > 1 && (
+          {/* Pagination - only show for server-side pagination (no filters) */}
+          {!hasClientFilters && currentTotalPages > 1 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: 4 }}>
               <Pagination
-                count={totalPages}
+                count={currentTotalPages}
                 page={currentPage}
                 onChange={handlePageChange}
                 color="primary"
@@ -244,11 +255,13 @@ export default function HomePageClient({ posts, tags, postsPerPage = 10 }: HomeP
           )}
 
           {/* Results Info */}
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Showing {startIndex + 1}-{Math.min(endIndex, filteredPosts.length)} of {filteredPosts.length} posts
-            </Typography>
-          </Box>
+          {!hasClientFilters && (
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Showing page {currentPage} of {currentTotalPages} ({pagination.total} total posts)
+              </Typography>
+            </Box>
+          )}
         </>
       ) : (
         <Box sx={{ textAlign: 'center', py: 8 }}>

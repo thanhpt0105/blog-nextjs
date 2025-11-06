@@ -1,11 +1,11 @@
 import { Container, Typography, Box, Chip, Divider, Avatar } from '@mui/material';
 import { CalendarMonth, Person } from '@mui/icons-material';
-import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Link from 'next/link';
 import Image from 'next/image';
+import { PostRepository } from '@/lib/repositories';
 
 interface PostPageProps {
   params: {
@@ -13,29 +13,8 @@ interface PostPageProps {
   };
 }
 
-async function getPost(slug: string) {
-  const post = await prisma.post.findUnique({
-    where: { slug, published: true },
-    include: {
-      author: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-      tags: {
-        include: {
-          tag: true,
-        },
-      },
-    },
-  });
-
-  return post;
-}
-
 export async function generateMetadata({ params }: PostPageProps) {
-  const post = await getPost(params.slug);
+  const post = await PostRepository.getPostBySlug(params.slug);
 
   if (!post) {
     return {
@@ -50,7 +29,7 @@ export async function generateMetadata({ params }: PostPageProps) {
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  const post = await getPost(params.slug);
+  const post = await PostRepository.getPostBySlug(params.slug);
 
   if (!post) {
     notFound();

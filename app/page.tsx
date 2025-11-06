@@ -1,54 +1,30 @@
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { prisma } from '@/lib/prisma';
 import HomePageClient from '@/components/HomePageClient';
 import { getSiteSettings } from '@/lib/settings';
+import { PostRepository, TagRepository } from '@/lib/repositories';
 
-async function getPublishedPosts() {
-  const posts = await prisma.post.findMany({
-    where: { published: true },
-    orderBy: { publishedAt: 'desc' },
-    include: {
-      author: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-      tags: {
-        include: {
-          tag: true,
-        },
-      },
-    },
-  });
-
-  return posts;
+interface HomePageProps {
+  searchParams: {
+    page?: string;
+  };
 }
 
-async function getAllTags() {
-  const tags = await prisma.tag.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      posts: {
-        where: {
-          post: {
-            published: true,
-          },
-        },
-      },
-    },
-  });
-
-  return tags;
-}
-
-export default async function HomePage() {
-  const posts = await getPublishedPosts();
-  const tags = await getAllTags();
+export default async function HomePage({ searchParams }: HomePageProps) {
   const settings = await getSiteSettings();
   const postsPerPage = parseInt(settings.posts_per_page) || 10;
+  const currentPage = parseInt(searchParams.page || '1');
+
+  // Get paginated posts and all tags in parallel
+  const [postsResult, tags] = await Promise.all([
+    PostRepository.getPosts({
+      page: currentPage,
+      limit: postsPerPage,
+      published: true,
+    }),
+    TagRepository.getAllTags(),
+  ]);
 
   return (
     <Container maxWidth="lg">
@@ -66,7 +42,11 @@ export default async function HomePage() {
         </Typography>
       </Box>
 
-      <HomePageClient posts={posts} tags={tags} postsPerPage={postsPerPage} />
+      <HomePageClient 
+        posts={postsResult.data} 
+        tags={tags} 
+        pagination={postsResult.pagination}
+      />
     </Container>
   );
 }

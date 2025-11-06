@@ -1,4 +1,5 @@
 import { ThemeRegistry } from '@/components/ThemeRegistry';
+import { AuthProvider } from '@/components/AuthProvider';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import Box from '@mui/material/Box';
@@ -35,21 +36,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body style={{ margin: 0 }}>
-        <ThemeRegistry>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: '100vh',
-            }}
-          >
-            <Navbar />
-            <Box component="main" sx={{ flexGrow: 1, py: 4 }}>
-              {children}
+        <AuthProvider>
+          <ThemeRegistry>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '100vh',
+              }}
+            >
+              <Navbar />
+              <Box component="main" sx={{ flexGrow: 1, py: 4 }}>
+                {children}
+              </Box>
+              <Footer />
             </Box>
-            <Footer />
-          </Box>
-        </ThemeRegistry>
+          </ThemeRegistry>
+        </AuthProvider>
       </body>
     </html>
   );

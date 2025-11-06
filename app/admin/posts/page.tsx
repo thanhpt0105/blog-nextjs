@@ -11,6 +11,7 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import AdminPostsClient from '@/components/admin/AdminPostsClient';
+import { getSiteSettings } from '@/lib/settings';
 
 async function getPosts() {
   const posts = await prisma.post.findMany({
@@ -53,6 +54,8 @@ export default async function PostsPage() {
 
   const posts = await getPosts();
   const tags = await getAllTags();
+  const settings = await getSiteSettings();
+  const postsPerPage = parseInt(settings.posts_per_page) || 10;
 
   return (
     <Box>
@@ -68,7 +71,7 @@ export default async function PostsPage() {
         </Button>
       </Box>
 
-      <AdminPostsClient posts={posts} tags={tags} />
+      <AdminPostsClient posts={posts} tags={tags} postsPerPage={postsPerPage} />
     </Box>
   );
 }

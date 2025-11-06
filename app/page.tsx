@@ -48,6 +48,7 @@ export default async function HomePage() {
   const posts = await getPublishedPosts();
   const tags = await getAllTags();
   const settings = await getSiteSettings();
+  const postsPerPage = parseInt(settings.posts_per_page) || 10;
 
   return (
     <Container maxWidth="lg">
@@ -65,7 +66,7 @@ export default async function HomePage() {
         </Typography>
       </Box>
 
-      <HomePageClient posts={posts} tags={tags} />
+      <HomePageClient posts={posts} tags={tags} postsPerPage={postsPerPage} />
     </Container>
   );
 }

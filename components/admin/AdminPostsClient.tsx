@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Box, Autocomplete, TextField, Chip, Paper } from '@mui/material';
+import { Box, Autocomplete, TextField, Chip, Paper, Pagination, Typography } from '@mui/material';
 import { FilterList } from '@mui/icons-material';
 import PostsTable from './PostsTable';
 
@@ -34,10 +34,12 @@ interface Tag {
 interface AdminPostsClientProps {
   posts: Post[];
   tags: Tag[];
+  postsPerPage?: number;
 }
 
-export default function AdminPostsClient({ posts, tags }: AdminPostsClientProps) {
+export default function AdminPostsClient({ posts, tags, postsPerPage = 10 }: AdminPostsClientProps) {
   const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter posts based on selected tag
   const filteredPosts = useMemo(() => {
@@ -50,6 +52,21 @@ export default function AdminPostsClient({ posts, tags }: AdminPostsClientProps)
     );
   }, [posts, selectedTag]);
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = startIndex + postsPerPage;
+  const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setCurrentPage(value);
+  };
+
+  const handleTagChange = (_event: any, newValue: Tag | null) => {
+    setSelectedTag(newValue);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
   return (
     <>
       {/* Tag Filter */}
@@ -60,9 +77,7 @@ export default function AdminPostsClient({ posts, tags }: AdminPostsClientProps)
             options={tags}
             getOptionLabel={(option) => `${option.name} (${option.posts.length} posts)`}
             value={selectedTag}
-            onChange={(event, newValue) => {
-              setSelectedTag(newValue);
-            }}
+            onChange={handleTagChange}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -84,7 +99,24 @@ export default function AdminPostsClient({ posts, tags }: AdminPostsClientProps)
       </Paper>
 
       {/* Posts Table */}
-      <PostsTable posts={filteredPosts as any} />
+      <PostsTable posts={paginatedPosts as any} />
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 4, gap: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredPosts.length)} of {filteredPosts.length} posts
+          </Typography>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            showFirstButton
+            showLastButton
+          />
+        </Box>
+      )}
     </>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Box, Chip, Typography, Button, TextField, InputAdornment } from '@mui/material';
+import { Box, Chip, Typography, Button, TextField, InputAdornment, Pagination } from '@mui/material';
 import { Label, Close, Search } from '@mui/icons-material';
 import PostListClient from './PostListClient';
 
@@ -35,11 +35,13 @@ interface Tag {
 interface HomePageClientProps {
   posts: Post[];
   tags: Tag[];
+  postsPerPage?: number;
 }
 
-export default function HomePageClient({ posts, tags }: HomePageClientProps) {
+export default function HomePageClient({ posts, tags, postsPerPage = 10 }: HomePageClientProps) {
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter posts based on selected tags and search query
   const filteredPosts = useMemo(() => {
@@ -72,6 +74,12 @@ export default function HomePageClient({ posts, tags }: HomePageClientProps) {
     return filtered;
   }, [posts, selectedTagIds, searchQuery]);
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = startIndex + postsPerPage;
+  const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+
   // Get tags that have published posts
   const tagsWithPosts = useMemo(() => {
     return tags.filter(tag => tag.posts.length > 0);
@@ -85,15 +93,24 @@ export default function HomePageClient({ posts, tags }: HomePageClientProps) {
         return [...prev, tagId];
       }
     });
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const clearAllFilters = () => {
     setSelectedTagIds([]);
     setSearchQuery('');
+    setCurrentPage(1);
   };
 
   const clearSearch = () => {
     setSearchQuery('');
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setCurrentPage(value);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const selectedTags = tagsWithPosts.filter(tag => selectedTagIds.includes(tag.id));
@@ -208,7 +225,31 @@ export default function HomePageClient({ posts, tags }: HomePageClientProps) {
 
       {/* Posts List */}
       {filteredPosts.length > 0 ? (
-        <PostListClient posts={filteredPosts} />
+        <>
+          <PostListClient posts={paginatedPosts} />
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: 4 }}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+                showFirstButton
+                showLastButton
+              />
+            </Box>
+          )}
+
+          {/* Results Info */}
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredPosts.length)} of {filteredPosts.length} posts
+            </Typography>
+          </Box>
+        </>
       ) : (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h5" color="text.secondary" gutterBottom>

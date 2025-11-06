@@ -125,7 +125,7 @@ export default function SettingsPage() {
                 value={settings.posts_per_page}
                 onChange={(e) => setSettings({ ...settings, posts_per_page: e.target.value })}
                 inputProps={{ min: 1, max: 100 }}
-                helperText="Number of posts to display per page (for future pagination)"
+                helperText="Number of posts to display per page on the homepage and admin panel"
               />
             </Paper>
 

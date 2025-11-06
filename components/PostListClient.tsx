@@ -87,7 +87,16 @@ export default function PostListClient({ posts }: PostListClientProps) {
                       label={postTag.tag.name}
                       size="small"
                       variant="outlined"
-                      component="span"
+                      component={Link}
+                      href={`/tags/${postTag.tag.slug}`}
+                      clickable
+                      sx={{
+                        textDecoration: 'none',
+                        '&:hover': {
+                          backgroundColor: 'primary.light',
+                        },
+                      }}
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     />
                   ))}
                 </Box>

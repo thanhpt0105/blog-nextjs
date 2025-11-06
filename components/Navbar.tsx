@@ -61,6 +61,11 @@ export function Navbar() {
                 Home
               </Button>
             </Link>
+            <Link href="/tags" passHref legacyBehavior>
+              <Button color="inherit" component="a">
+                Tags
+              </Button>
+            </Link>
             <Link href="/about" passHref legacyBehavior>
               <Button color="inherit" component="a">
                 About

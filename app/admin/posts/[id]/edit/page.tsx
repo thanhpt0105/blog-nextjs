@@ -13,10 +13,22 @@ import {
   Alert,
   Grid,
   CircularProgress,
+  Autocomplete,
+  Chip,
 } from '@mui/material';
 import { Save, ArrowBack } from '@mui/icons-material';
 import Link from 'next/link';
 import TiptapEditor from '@/components/TiptapEditor';
+
+interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface PostTag {
+  tag: Tag;
+}
 
 interface Post {
   id: string;
@@ -26,6 +38,7 @@ interface Post {
   content: string;
   coverImage: string;
   published: boolean;
+  tags: PostTag[];
 }
 
 export default function EditPostPage({ params }: { params: { id: string } }) {
@@ -33,6 +46,8 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -41,6 +56,23 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     coverImage: '',
     published: false,
   });
+
+  useEffect(() => {
+    // Fetch available tags
+    const fetchTags = async () => {
+      try {
+        const response = await fetch('/api/tags');
+        if (response.ok) {
+          const data = await response.json();
+          setTags(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch tags:', err);
+      }
+    };
+
+    fetchTags();
+  }, []);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -60,6 +92,11 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
           coverImage: post.coverImage || '',
           published: post.published,
         });
+        
+        // Set selected tags
+        if (post.tags) {
+          setSelectedTags(post.tags.map(pt => pt.tag));
+        }
       } catch (err) {
         setError('Failed to load post');
       } finally {
@@ -98,7 +135,10 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          tagIds: selectedTags.map(tag => tag.id),
+        }),
       });
 
       const data = await response.json();
@@ -229,6 +269,37 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
                 onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
                 placeholder="https://..."
                 helperText="Enter image URL or upload (coming soon)"
+              />
+            </Paper>
+
+            <Paper sx={{ p: 3, mt: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Tags
+              </Typography>
+              <Autocomplete
+                multiple
+                options={tags}
+                getOptionLabel={(option) => option.name}
+                value={selectedTags}
+                onChange={(event, newValue) => {
+                  setSelectedTags(newValue);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Select tags"
+                    helperText="Choose tags for this post"
+                  />
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      label={option.name}
+                      {...getTagProps({ index })}
+                      key={option.id}
+                    />
+                  ))
+                }
               />
             </Paper>
           </Grid>

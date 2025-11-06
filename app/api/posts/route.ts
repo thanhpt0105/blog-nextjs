@@ -10,6 +10,7 @@ const postSchema = z.object({
   excerpt: z.string().optional(),
   coverImage: z.string().optional(),
   published: z.boolean().default(false),
+  tagIds: z.array(z.string()).optional().default([]),
 });
 
 export async function GET(request: NextRequest) {
@@ -76,17 +77,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Separate tagIds from post data
+    const { tagIds, ...postData } = validatedData;
+
     const post = await prisma.post.create({
       data: {
-        ...validatedData,
+        ...postData,
         authorId: session.user.id,
         publishedAt: validatedData.published ? new Date() : null,
+        tags: {
+          create: tagIds.map((tagId) => ({
+            tag: {
+              connect: { id: tagId },
+            },
+          })),
+        },
       },
       include: {
         author: {
           select: {
             name: true,
             email: true,
+          },
+        },
+        tags: {
+          include: {
+            tag: true,
           },
         },
       },

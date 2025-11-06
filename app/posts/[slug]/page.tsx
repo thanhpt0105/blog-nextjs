@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import Link from 'next/link';
 
 interface PostPageProps {
   params: {
@@ -100,6 +101,15 @@ export default async function PostPage({ params }: PostPageProps) {
                     label={postTag.tag.name}
                     size="small"
                     variant="outlined"
+                    component={Link}
+                    href={`/tags/${postTag.tag.slug}`}
+                    clickable
+                    sx={{
+                      textDecoration: 'none',
+                      '&:hover': {
+                        backgroundColor: 'primary.light',
+                      },
+                    }}
                   />
                 ))}
               </Box>

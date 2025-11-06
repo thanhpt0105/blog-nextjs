@@ -2,7 +2,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { prisma } from '@/lib/prisma';
-import PostListClient from '@/components/PostListClient';
+import HomePageClient from '@/components/HomePageClient';
 
 async function getPublishedPosts() {
   const posts = await prisma.post.findMany({
@@ -21,14 +21,31 @@ async function getPublishedPosts() {
         },
       },
     },
-    take: 10, // Show latest 10 posts on homepage
   });
 
   return posts;
 }
 
+async function getAllTags() {
+  const tags = await prisma.tag.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      posts: {
+        where: {
+          post: {
+            published: true,
+          },
+        },
+      },
+    },
+  });
+
+  return tags;
+}
+
 export default async function HomePage() {
   const posts = await getPublishedPosts();
+  const tags = await getAllTags();
 
   return (
     <Container maxWidth="lg">
@@ -46,15 +63,7 @@ export default async function HomePage() {
         </Typography>
       </Box>
 
-      {posts.length > 0 ? (
-        <PostListClient posts={posts} />
-      ) : (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h5" color="text.secondary">
-            No posts yet. Check back soon!
-          </Typography>
-        </Box>
-      )}
+      <HomePageClient posts={posts} tags={tags} />
     </Container>
   );
 }

@@ -10,7 +10,7 @@ import {
   Add,
 } from '@mui/icons-material';
 import Link from 'next/link';
-import PostsTable from '@/components/admin/PostsTable';
+import AdminPostsClient from '@/components/admin/AdminPostsClient';
 
 async function getPosts() {
   const posts = await prisma.post.findMany({
@@ -33,6 +33,17 @@ async function getPosts() {
   return posts;
 }
 
+async function getAllTags() {
+  const tags = await prisma.tag.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      posts: true,
+    },
+  });
+
+  return tags;
+}
+
 export default async function PostsPage() {
   const session = await auth();
 
@@ -41,6 +52,7 @@ export default async function PostsPage() {
   }
 
   const posts = await getPosts();
+  const tags = await getAllTags();
 
   return (
     <Box>
@@ -56,7 +68,7 @@ export default async function PostsPage() {
         </Button>
       </Box>
 
-      <PostsTable posts={posts} />
+      <AdminPostsClient posts={posts} tags={tags} />
     </Box>
   );
 }

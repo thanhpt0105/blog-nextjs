@@ -10,6 +10,7 @@ const postSchema = z.object({
   excerpt: z.string().optional(),
   coverImage: z.string().optional(),
   published: z.boolean().default(false),
+  tagIds: z.array(z.string()).optional().default([]),
 });
 
 export async function GET(
@@ -118,21 +119,39 @@ export async function PUT(
       );
     }
 
+    // Separate tagIds from post data
+    const { tagIds, ...postData } = validatedData;
+
     const post = await prisma.post.update({
       where: { id: params.id },
       data: {
-        ...validatedData,
+        ...postData,
         publishedAt: validatedData.published && !existingPost.publishedAt 
           ? new Date() 
           : !validatedData.published 
             ? null 
             : existingPost.publishedAt,
+        tags: {
+          // Delete all existing tag associations
+          deleteMany: {},
+          // Create new tag associations
+          create: tagIds.map((tagId) => ({
+            tag: {
+              connect: { id: tagId },
+            },
+          })),
+        },
       },
       include: {
         author: {
           select: {
             name: true,
             email: true,
+          },
+        },
+        tags: {
+          include: {
+            tag: true,
           },
         },
       },

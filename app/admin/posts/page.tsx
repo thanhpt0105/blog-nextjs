@@ -16,6 +16,7 @@ import { PostRepository, TagRepository } from '@/lib/repositories';
 interface AdminPostsPageProps {
   searchParams: {
     page?: string;
+    tag?: string; // Single tag filter for admin
   };
 }
 
@@ -29,12 +30,14 @@ export default async function PostsPage({ searchParams }: AdminPostsPageProps) {
   const settings = await getSiteSettings();
   const postsPerPage = parseInt(settings.posts_per_page) || 10;
   const currentPage = parseInt(searchParams.page || '1');
+  const tagFilter = searchParams.tag || '';
 
   // Get paginated posts and all tags in parallel
   const [postsResult, tags] = await Promise.all([
     PostRepository.getPosts({
       page: currentPage,
       limit: postsPerPage,
+      tagId: tagFilter || undefined,
     }),
     TagRepository.getAllTagsAdmin(),
   ]);
@@ -57,6 +60,7 @@ export default async function PostsPage({ searchParams }: AdminPostsPageProps) {
         posts={postsResult.data} 
         tags={tags}
         pagination={postsResult.pagination}
+        initialTagId={tagFilter}
       />
     </Box>
   );

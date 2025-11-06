@@ -8,6 +8,8 @@ import { PostRepository, TagRepository } from '@/lib/repositories';
 interface HomePageProps {
   searchParams: {
     page?: string;
+    search?: string;
+    tags?: string | string[]; // Can be single tag or array of tags
   };
 }
 
@@ -15,6 +17,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const settings = await getSiteSettings();
   const postsPerPage = parseInt(settings.posts_per_page) || 10;
   const currentPage = parseInt(searchParams.page || '1');
+  const searchQuery = searchParams.search || '';
+  
+  // Handle tags parameter (can be single string or array)
+  const tagIdsParam = searchParams.tags;
+  const tagIds = tagIdsParam 
+    ? (Array.isArray(tagIdsParam) ? tagIdsParam : [tagIdsParam])
+    : [];
 
   // Get paginated posts and all tags in parallel
   const [postsResult, tags] = await Promise.all([
@@ -22,6 +31,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       page: currentPage,
       limit: postsPerPage,
       published: true,
+      tagIds: tagIds.length > 0 ? tagIds : undefined,
+      search: searchQuery || undefined,
     }),
     TagRepository.getAllTags(),
   ]);
@@ -46,6 +57,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         posts={postsResult.data} 
         tags={tags} 
         pagination={postsResult.pagination}
+        initialSearch={searchQuery}
+        initialTagIds={tagIds}
       />
     </Container>
   );

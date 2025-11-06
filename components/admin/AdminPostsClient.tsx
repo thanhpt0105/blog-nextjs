@@ -43,12 +43,15 @@ interface AdminPostsClientProps {
     hasNext: boolean;
     hasPrev: boolean;
   };
+  initialTagId: string;
 }
 
-export default function AdminPostsClient({ posts, tags, pagination }: AdminPostsClientProps) {
+export default function AdminPostsClient({ posts, tags, pagination, initialTagId }: AdminPostsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
+  const [selectedTag, setSelectedTag] = useState<Tag | null>(
+    tags.find(tag => tag.id === initialTagId) || null
+  );
 
   // Filter posts based on selected tag
   const filteredPosts = useMemo(() => {
@@ -100,7 +103,7 @@ export default function AdminPostsClient({ posts, tags, pagination }: AdminPosts
           />
           {selectedTag && (
             <Chip
-              label={`Showing ${displayTotal} of ${pagination.total} posts`}
+              label={`Showing ${pagination.total} of ${tags.find(t => !selectedTag || t.id !== selectedTag.id) ? pagination.total : 'all'} posts`}
               color="primary"
               variant="outlined"
             />
@@ -111,11 +114,11 @@ export default function AdminPostsClient({ posts, tags, pagination }: AdminPosts
       {/* Posts Table */}
       <PostsTable posts={displayPosts as any} />
 
-      {/* Pagination - only show for server-side pagination (no tag filter) */}
-      {!hasClientFilter && pagination.totalPages > 1 && (
+      {/* Pagination - now works with tag filter */}
+      {pagination.totalPages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 4, gap: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            Page {pagination.page} of {pagination.totalPages} ({pagination.total} total posts)
+            Page {pagination.page} of {pagination.totalPages} ({pagination.total} total posts{selectedTag ? ` with tag "${selectedTag.name}"` : ''})
           </Typography>
           <Pagination
             count={pagination.totalPages}
@@ -128,11 +131,11 @@ export default function AdminPostsClient({ posts, tags, pagination }: AdminPosts
         </Box>
       )}
 
-      {/* Show info when tag filter is active */}
-      {hasClientFilter && (
+      {/* Show info when no pagination */}
+      {pagination.totalPages <= 1 && (
         <Box sx={{ textAlign: 'center', mt: 4 }}>
           <Typography variant="body2" color="text.secondary">
-            Showing {displayTotal} post{displayTotal !== 1 ? 's' : ''} with tag "{selectedTag?.name}"
+            Showing {pagination.total} post{pagination.total !== 1 ? 's' : ''}{selectedTag ? ` with tag "${selectedTag.name}"` : ''}
           </Typography>
         </Box>
       )}

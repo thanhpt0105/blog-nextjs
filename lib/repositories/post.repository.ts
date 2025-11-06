@@ -6,6 +6,7 @@ export interface GetPostsParams {
   published?: boolean;
   authorId?: string;
   tagId?: string;
+  tagIds?: string[]; // Support multiple tags
   search?: string;
 }
 
@@ -32,6 +33,7 @@ export class PostRepository {
       published,
       authorId,
       tagId,
+      tagIds,
       search,
     } = params;
 
@@ -48,12 +50,24 @@ export class PostRepository {
       where.authorId = authorId;
     }
 
+    // Single tag filter
     if (tagId) {
       where.tags = {
         some: {
           tagId: tagId,
         },
       };
+    }
+
+    // Multiple tags filter (post must have ALL selected tags - AND logic)
+    if (tagIds && tagIds.length > 0) {
+      where.AND = tagIds.map(id => ({
+        tags: {
+          some: {
+            tagId: id,
+          },
+        },
+      }));
     }
 
     if (search) {

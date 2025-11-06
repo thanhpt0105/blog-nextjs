@@ -44,48 +44,39 @@ interface HomePageClientProps {
     hasNext: boolean;
     hasPrev: boolean;
   };
+  initialSearch: string;
+  initialTagIds: string[];
 }
 
-export default function HomePageClient({ posts, tags, pagination }: HomePageClientProps) {
+export default function HomePageClient({ posts, tags, pagination, initialSearch, initialTagIds }: HomePageClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(initialTagIds);
 
-  // Filter posts based on selected tags and search query (client-side)
-  const filteredPosts = useMemo(() => {
-    let filtered = posts;
-
-    // Filter by tags
-    if (selectedTagIds.length > 0) {
-      // Post must have ALL selected tags (AND logic)
-      filtered = filtered.filter(post =>
-        selectedTagIds.every(selectedTagId =>
-          post.tags.some(postTag => postTag.tag.id === selectedTagId)
-        )
-      );
+  // Update filters and trigger server-side filtering
+  const updateFilters = (newTagIds: string[], newSearch: string) => {
+    const params = new URLSearchParams();
+    
+    // Reset to page 1 when filters change
+    params.set('page', '1');
+    
+    // Add tag filters
+    if (newTagIds.length > 0) {
+      newTagIds.forEach(tagId => params.append('tags', tagId));
     }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(post => {
-        const titleMatch = post.title.toLowerCase().includes(query);
-        const excerptMatch = post.excerpt?.toLowerCase().includes(query);
-        const authorMatch = post.author.name?.toLowerCase().includes(query);
-        const tagMatch = post.tags.some(postTag => 
-          postTag.tag.name.toLowerCase().includes(query)
-        );
-        return titleMatch || excerptMatch || authorMatch || tagMatch;
-      });
+    
+    // Add search query
+    if (newSearch.trim()) {
+      params.set('search', newSearch.trim());
     }
+    
+    router.push(`?${params.toString()}`);
+  };
 
-    return filtered;
-  }, [posts, selectedTagIds, searchQuery]);
-
-  // If filters are active, use client-side pagination, else use server pagination
-  const hasClientFilters = selectedTagIds.length > 0 || searchQuery.trim().length > 0;
-  const displayPosts = hasClientFilters ? filteredPosts : posts;
+  // No need for client-side filtering anymore - data is already filtered from server
+  const displayPosts = posts;
+  const hasActiveFilters = selectedTagIds.length > 0 || searchQuery.trim().length > 0;
 
   // Get tags that have published posts
   const tagsWithPosts = useMemo(() => {
@@ -93,48 +84,64 @@ export default function HomePageClient({ posts, tags, pagination }: HomePageClie
   }, [tags]);
 
   const toggleTag = (tagId: string) => {
-    setSelectedTagIds(prev => {
-      if (prev.includes(tagId)) {
-        return prev.filter(id => id !== tagId);
-      } else {
-        return [...prev, tagId];
-      }
-    });
+    const newTagIds = selectedTagIds.includes(tagId)
+      ? selectedTagIds.filter(id => id !== tagId)
+      : [...selectedTagIds, tagId];
+    
+    setSelectedTagIds(newTagIds);
+    updateFilters(newTagIds, searchQuery);
   };
 
   const clearAllFilters = () => {
     setSelectedTagIds([]);
     setSearchQuery('');
+    router.push('/');
   };
 
   const clearSearch = () => {
     setSearchQuery('');
+    updateFilters(selectedTagIds, '');
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateFilters(selectedTagIds, searchQuery);
   };
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
-    // Update URL with new page
-    const params = new URLSearchParams(searchParams.toString());
+    // Update URL with new page, preserving existing filters
+    const params = new URLSearchParams();
     params.set('page', value.toString());
+    
+    // Preserve tag filters
+    if (selectedTagIds.length > 0) {
+      selectedTagIds.forEach(tagId => params.append('tags', tagId));
+    }
+    
+    // Preserve search query
+    if (searchQuery.trim()) {
+      params.set('search', searchQuery.trim());
+    }
+    
     router.push(`?${params.toString()}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const selectedTags = tagsWithPosts.filter(tag => selectedTagIds.includes(tag.id));
-  const hasActiveFilters = selectedTagIds.length > 0 || searchQuery.trim().length > 0;
 
-  // Display info
-  const showingTotal = hasClientFilters ? filteredPosts.length : pagination.total;
-  const currentTotalPages = hasClientFilters ? 1 : pagination.totalPages;
-  const currentPage = hasClientFilters ? 1 : pagination.page;
+  // All data comes from server already filtered
+  const showingTotal = pagination.total;
+  const currentTotalPages = pagination.totalPages;
+  const currentPage = pagination.page;
 
   return (
     <>
       {/* Search Box */}
-      <Box sx={{ mb: 4 }}>
+      <Box component="form" onSubmit={handleSearchSubmit} sx={{ mb: 4 }}>
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Search posts by title, content, author, or tags..."
+          placeholder="Search posts by title, content, or excerpt..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           InputProps={{
@@ -154,6 +161,11 @@ export default function HomePageClient({ posts, tags, pagination }: HomePageClie
                 </Button>
               </InputAdornment>
             ),
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSearchSubmit(e as any);
+            }
           }}
         />
       </Box>
@@ -200,7 +212,7 @@ export default function HomePageClient({ posts, tags, pagination }: HomePageClie
                     : searchQuery 
                     ? 'Search results'
                     : 'Active filters'
-                  } ({showingTotal} {showingTotal === 1 ? 'post' : 'posts'}):
+                  } ({showingTotal} {showingTotal === 1 ? 'post' : 'posts'} found):
                 </Typography>
                 {searchQuery && (
                   <Chip
@@ -239,8 +251,8 @@ export default function HomePageClient({ posts, tags, pagination }: HomePageClie
         <>
           <PostListClient posts={displayPosts} />
           
-          {/* Pagination - only show for server-side pagination (no filters) */}
-          {!hasClientFilters && currentTotalPages > 1 && (
+          {/* Pagination - now works with filters */}
+          {currentTotalPages > 1 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: 4 }}>
               <Pagination
                 count={currentTotalPages}
@@ -255,13 +267,14 @@ export default function HomePageClient({ posts, tags, pagination }: HomePageClie
           )}
 
           {/* Results Info */}
-          {!hasClientFilters && (
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Showing page {currentPage} of {currentTotalPages} ({pagination.total} total posts)
-              </Typography>
-            </Box>
-          )}
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              {currentTotalPages > 1 
+                ? `Showing page ${currentPage} of ${currentTotalPages} (${pagination.total} total posts)`
+                : `Showing ${pagination.total} ${pagination.total === 1 ? 'post' : 'posts'}`
+              }
+            </Typography>
+          </Box>
         </>
       ) : (
         <Box sx={{ textAlign: 'center', py: 8 }}>

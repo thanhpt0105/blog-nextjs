@@ -3,12 +3,19 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
 import {
   Box,
   Paper,
   IconButton,
   Divider,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
 } from '@mui/material';
 import {
   FormatBold,
@@ -18,7 +25,9 @@ import {
   FormatQuote,
   Code,
   HorizontalRule,
+  Image as ImageIcon,
 } from '@mui/icons-material';
+import { useState } from 'react';
 
 interface TiptapEditorProps {
   content: string;
@@ -26,14 +35,22 @@ interface TiptapEditorProps {
 }
 
 export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Link.configure({
         openOnClick: false,
       }),
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+      }),
     ],
     content,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -47,6 +64,14 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
   if (!editor) {
     return null;
   }
+
+  const addImage = () => {
+    if (imageUrl) {
+      editor.chain().focus().setImage({ src: imageUrl }).run();
+      setImageUrl('');
+      setImageDialogOpen(false);
+    }
+  };
 
   const MenuBar = () => {
     return (
@@ -123,6 +148,17 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
             <HorizontalRule />
           </IconButton>
         </Tooltip>
+
+        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+
+        <Tooltip title="Insert Image">
+          <IconButton
+            size="small"
+            onClick={() => setImageDialogOpen(true)}
+          >
+            <ImageIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
     );
   };
@@ -165,11 +201,46 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
               paddingLeft: '1rem',
               fontStyle: 'italic',
             },
+            '& img': {
+              maxWidth: '100%',
+              height: 'auto',
+              borderRadius: '0.5rem',
+            },
           },
         }}
       >
         <EditorContent editor={editor} />
       </Box>
+
+      <Dialog open={imageDialogOpen} onClose={() => setImageDialogOpen(false)}>
+        <DialogTitle>Insert Image</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Image URL"
+            type="url"
+            fullWidth
+            variant="outlined"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addImage();
+              }
+            }}
+            placeholder="https://example.com/image.jpg"
+            helperText="Enter the URL of the image you want to insert"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setImageDialogOpen(false)}>Cancel</Button>
+          <Button onClick={addImage} variant="contained" disabled={!imageUrl}>
+            Insert
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

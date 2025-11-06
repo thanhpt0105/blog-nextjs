@@ -1,0 +1,239 @@
+'use client';
+
+import { ReactNode, useState } from 'react';
+import {
+  Box,
+  Drawer,
+  AppBar,
+  Toolbar,
+  List,
+  Typography,
+  Divider,
+  IconButton,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Avatar,
+  Menu,
+  MenuItem,
+  Chip,
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Dashboard,
+  Article,
+  People,
+  Settings,
+  Link as LinkIcon,
+  Logout,
+  AccountCircle,
+} from '@mui/icons-material';
+import { usePathname, useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
+import Link from 'next/link';
+
+const drawerWidth = 260;
+
+const menuItems = [
+  { text: 'Dashboard', icon: <Dashboard />, href: '/admin' },
+  { text: 'Blog Posts', icon: <Article />, href: '/admin/posts' },
+  { text: 'Users', icon: <People />, href: '/admin/users' },
+  { text: 'Settings', icon: <Settings />, href: '/admin/settings' },
+  { text: 'Social Links', icon: <LinkIcon />, href: '/admin/social-links' },
+];
+
+export default function AdminLayout({ children }: { children: ReactNode }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSignOut = async () => {
+    handleClose();
+    await signOut({ callbackUrl: '/login' });
+  };
+
+  const drawer = (
+    <Box>
+      <Toolbar>
+        <Typography variant="h6" noWrap component="div">
+          Admin Panel
+        </Typography>
+      </Toolbar>
+      <Divider />
+      <List>
+        {menuItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                component={Link}
+                href={item.href}
+                selected={isActive}
+                sx={{
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.light',
+                    '&:hover': {
+                      backgroundColor: 'primary.light',
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    color: isActive ? 'primary.main' : 'inherit',
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+      </List>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+        }}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            {menuItems.find((item) => item.href === pathname)?.text || 'Admin'}
+          </Typography>
+
+          {session?.user && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Chip
+                label={session.user.role}
+                size="small"
+                color={session.user.role === 'ADMIN' ? 'error' : 'default'}
+              />
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                {session.user.image ? (
+                  <Avatar src={session.user.image} sx={{ width: 32, height: 32 }} />
+                ) : (
+                  <AccountCircle />
+                )}
+              </IconButton>
+            </Box>
+          )}
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem disabled>
+              <Typography variant="body2" color="text.secondary">
+                {session?.user?.email}
+              </Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem component={Link} href="/" onClick={handleClose}>
+              View Site
+            </MenuItem>
+            <MenuItem onClick={handleSignOut}>
+              <ListItemIcon>
+                <Logout fontSize="small" />
+              </ListItemIcon>
+              Sign Out
+            </MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+      >
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+        }}
+      >
+        <Toolbar />
+        {children}
+      </Box>
+    </Box>
+  );
+}

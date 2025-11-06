@@ -1,10 +1,7 @@
 import { Container, Typography, Box, Chip, Divider, Avatar } from '@mui/material';
 import { CalendarMonth, Person } from '@mui/icons-material';
 import { notFound } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import Link from 'next/link';
-import Image from 'next/image';
 import { PostRepository } from '@/lib/repositories';
 
 interface PostPageProps {
@@ -209,37 +206,8 @@ export default async function PostPage({ params }: PostPageProps) {
               fontWeight: 600,
             },
           }}
-        >
-          <ReactMarkdown 
-            remarkPlugins={[remarkGfm]}
-            components={{
-              img: ({ node, ...props }) => (
-                <img
-                  {...props}
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                    borderRadius: '8px',
-                    display: 'block',
-                    margin: '16px 0',
-                  }}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    // Show alt text or placeholder
-                    const alt = target.alt || 'Image failed to load';
-                    const placeholder = document.createElement('div');
-                    placeholder.style.cssText = 'padding: 20px; background: rgba(0,0,0,0.05); border-radius: 8px; text-align: center; color: rgba(0,0,0,0.5); margin: 16px 0;';
-                    placeholder.textContent = alt;
-                    target.parentNode?.replaceChild(placeholder, target);
-                  }}
-                />
-              ),
-            }}
-          >
-            {post.content}
-          </ReactMarkdown>
-        </Box>
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
       </Box>
     </Container>
   );

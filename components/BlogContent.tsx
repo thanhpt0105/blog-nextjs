@@ -2,8 +2,6 @@
 
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 interface BlogContentProps {
   content: string;
@@ -76,10 +74,7 @@ export function BlogContent({ content }: BlogContentProps) {
           my: 2,
         },
       }}
-    >
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-        {content}
-      </ReactMarkdown>
-    </Box>
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
   );
 }

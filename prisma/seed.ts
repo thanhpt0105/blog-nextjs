@@ -530,21 +530,21 @@ Stay tuned for these exciting updates!`,
   const socialLinks = await prisma.socialLink.createMany({
     data: [
       {
-        platform: 'github',
+        platform: 'GitHub',
         url: 'https://github.com',
         icon: 'GitHubIcon',
         order: 1,
         visible: true,
       },
       {
-        platform: 'twitter',
-        url: 'https://twitter.com',
-        icon: 'TwitterIcon',
+        platform: 'X',
+        url: 'https://x.com',
+        icon: 'XIcon',
         order: 2,
         visible: true,
       },
       {
-        platform: 'linkedin',
+        platform: 'LinkedIn',
         url: 'https://linkedin.com',
         icon: 'LinkedInIcon',
         order: 3,

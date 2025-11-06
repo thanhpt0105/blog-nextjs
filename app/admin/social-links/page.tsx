@@ -21,6 +21,10 @@ import {
   Switch,
   FormControlLabel,
   Alert,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   Add,
@@ -28,6 +32,12 @@ import {
   Delete,
   Link as LinkIcon,
   DragIndicator,
+  GitHub as GitHubIcon,
+  X as XIcon,
+  LinkedIn as LinkedInIcon,
+  Facebook as FacebookIcon,
+  Instagram as InstagramIcon,
+  YouTube as YouTubeIcon,
 } from '@mui/icons-material';
 
 interface SocialLink {
@@ -39,6 +49,35 @@ interface SocialLink {
   visible: boolean;
 }
 
+const SOCIAL_PLATFORMS = [
+  { value: 'GitHub', label: 'GitHub', icon: <GitHubIcon /> },
+  { value: 'X', label: 'X (Twitter)', icon: <XIcon /> },
+  { value: 'LinkedIn', label: 'LinkedIn', icon: <LinkedInIcon /> },
+  { value: 'Facebook', label: 'Facebook', icon: <FacebookIcon /> },
+  { value: 'Instagram', label: 'Instagram', icon: <InstagramIcon /> },
+  { value: 'YouTube', label: 'YouTube', icon: <YouTubeIcon /> },
+] as const;
+
+const getPlatformIcon = (platform: string) => {
+  const platformUpper = platform.toUpperCase();
+  switch (platformUpper) {
+    case 'GITHUB':
+      return <GitHubIcon fontSize="small" />;
+    case 'X':
+      return <XIcon fontSize="small" />;
+    case 'LINKEDIN':
+      return <LinkedInIcon fontSize="small" />;
+    case 'FACEBOOK':
+      return <FacebookIcon fontSize="small" />;
+    case 'INSTAGRAM':
+      return <InstagramIcon fontSize="small" />;
+    case 'YOUTUBE':
+      return <YouTubeIcon fontSize="small" />;
+    default:
+      return <LinkIcon fontSize="small" />;
+  }
+};
+
 export default function SocialLinksPage() {
   const [links, setLinks] = useState<SocialLink[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -46,9 +85,8 @@ export default function SocialLinksPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
-    platform: '',
+    platform: 'GitHub',
     url: '',
-    icon: '',
     visible: true,
   });
 
@@ -72,15 +110,13 @@ export default function SocialLinksPage() {
       setFormData({
         platform: link.platform,
         url: link.url,
-        icon: link.icon || '',
         visible: link.visible,
       });
     } else {
       setEditingLink(null);
       setFormData({
-        platform: '',
+        platform: 'GitHub',
         url: '',
-        icon: '',
         visible: true,
       });
     }
@@ -195,7 +231,7 @@ export default function SocialLinksPage() {
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <LinkIcon fontSize="small" />
+                        {getPlatformIcon(link.platform)}
                         {link.platform}
                       </Box>
                     </TableCell>
@@ -235,26 +271,30 @@ export default function SocialLinksPage() {
         <DialogTitle>{editingLink ? 'Edit Social Link' : 'Add Social Link'}</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="Platform"
-              value={formData.platform}
-              onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-              placeholder="e.g., Twitter, GitHub, LinkedIn"
-            />
+            <FormControl fullWidth>
+              <InputLabel>Platform</InputLabel>
+              <Select
+                value={formData.platform}
+                label="Platform"
+                onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+              >
+                {SOCIAL_PLATFORMS.map((platform) => (
+                  <MenuItem key={platform.value} value={platform.value}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {platform.icon}
+                      {platform.label}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <TextField
               fullWidth
               label="URL"
               value={formData.url}
               onChange={(e) => setFormData({ ...formData, url: e.target.value })}
               placeholder="https://..."
-            />
-            <TextField
-              fullWidth
-              label="Icon (optional)"
-              value={formData.icon}
-              onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-              placeholder="e.g., TwitterIcon, GitHubIcon"
+              helperText={`Enter your ${formData.platform} profile URL`}
             />
             <FormControlLabel
               control={

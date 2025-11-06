@@ -6,7 +6,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import TwitterIcon from '@mui/icons-material/Twitter';
+import XIcon from '@mui/icons-material/X';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -26,9 +26,8 @@ const getPlatformIcon = (platform: string) => {
   switch (platformLower) {
     case 'github':
       return <GitHubIcon />;
-    case 'twitter':
     case 'x':
-      return <TwitterIcon />;
+      return <XIcon />;
     case 'linkedin':
       return <LinkedInIcon />;
     case 'facebook':

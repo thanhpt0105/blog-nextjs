@@ -28,6 +28,7 @@ import {
   Link as LinkIcon,
   Logout,
   AccountCircle,
+  Label,
 } from '@mui/icons-material';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -38,6 +39,7 @@ const drawerWidth = 260;
 const menuItems = [
   { text: 'Dashboard', icon: <Dashboard />, href: '/admin' },
   { text: 'Blog Posts', icon: <Article />, href: '/admin/posts' },
+  { text: 'Tags', icon: <Label />, href: '/admin/tags' },
   { text: 'Users', icon: <People />, href: '/admin/users' },
   { text: 'Settings', icon: <Settings />, href: '/admin/settings' },
   { text: 'Social Links', icon: <LinkIcon />, href: '/admin/social-links' },

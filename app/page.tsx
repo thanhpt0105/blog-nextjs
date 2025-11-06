@@ -1,11 +1,34 @@
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { PostList } from '@/components/PostList';
-import { getAllPosts } from '@/lib/posts';
+import { prisma } from '@/lib/prisma';
+import PostListClient from '@/components/PostListClient';
 
-export default function HomePage() {
-  const posts = getAllPosts();
+async function getPublishedPosts() {
+  const posts = await prisma.post.findMany({
+    where: { published: true },
+    orderBy: { publishedAt: 'desc' },
+    include: {
+      author: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
+    take: 10, // Show latest 10 posts on homepage
+  });
+
+  return posts;
+}
+
+export default async function HomePage() {
+  const posts = await getPublishedPosts();
 
   return (
     <Container maxWidth="lg">
@@ -24,7 +47,7 @@ export default function HomePage() {
       </Box>
 
       {posts.length > 0 ? (
-        <PostList posts={posts} />
+        <PostListClient posts={posts} />
       ) : (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h5" color="text.secondary">

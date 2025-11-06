@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { prisma } from '@/lib/prisma';
 import HomePageClient from '@/components/HomePageClient';
+import { getSiteSettings } from '@/lib/settings';
 
 async function getPublishedPosts() {
   const posts = await prisma.post.findMany({
@@ -46,6 +47,7 @@ async function getAllTags() {
 export default async function HomePage() {
   const posts = await getPublishedPosts();
   const tags = await getAllTags();
+  const settings = await getSiteSettings();
 
   return (
     <Container maxWidth="lg">
@@ -56,10 +58,10 @@ export default async function HomePage() {
           gutterBottom
           sx={{ fontWeight: 700 }}
         >
-          Welcome to My Blog
+          Welcome to {settings.site_name}
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-          Explore articles on web development, software engineering, and technology
+          {settings.site_description}
         </Typography>
       </Box>
 

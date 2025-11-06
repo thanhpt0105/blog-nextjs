@@ -68,9 +68,14 @@ export default function SettingsPage() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Site Settings
-      </Typography>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="h4" gutterBottom>
+          Site Settings
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Configure your site's basic information. These settings appear in the site title, metadata, and footer.
+        </Typography>
+      </Box>
 
       {success && (
         <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess(false)}>
@@ -98,6 +103,7 @@ export default function SettingsPage() {
                 label="Site Name"
                 value={settings.site_name}
                 onChange={(e) => setSettings({ ...settings, site_name: e.target.value })}
+                helperText="Appears in the browser title, navigation bar, and footer"
                 sx={{ mb: 3 }}
               />
 
@@ -108,6 +114,7 @@ export default function SettingsPage() {
                 rows={3}
                 value={settings.site_description}
                 onChange={(e) => setSettings({ ...settings, site_description: e.target.value })}
+                helperText="Used for SEO and social media previews"
                 sx={{ mb: 3 }}
               />
 
@@ -118,6 +125,7 @@ export default function SettingsPage() {
                 value={settings.posts_per_page}
                 onChange={(e) => setSettings({ ...settings, posts_per_page: e.target.value })}
                 inputProps={{ min: 1, max: 100 }}
+                helperText="Number of posts to display per page (for future pagination)"
               />
             </Paper>
 

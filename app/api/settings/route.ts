@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth-server';
 import { prisma } from '@/lib/prisma';
+import { clearSettingsCache } from '@/lib/settings';
+import { revalidatePath } from 'next/cache';
 
 export async function GET() {
   try {
@@ -42,6 +44,12 @@ export async function PUT(request: NextRequest) {
         })
       )
     );
+
+    // Clear the settings cache so new values are fetched
+    clearSettingsCache();
+
+    // Revalidate all pages to pick up new settings
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({ message: 'Settings updated successfully' });
   } catch (error) {

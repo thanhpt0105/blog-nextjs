@@ -21,6 +21,10 @@ interface SocialLink {
   visible: boolean;
 }
 
+interface FooterProps {
+  siteName?: string;
+}
+
 const getPlatformIcon = (platform: string) => {
   const platformLower = platform.toLowerCase();
   switch (platformLower) {
@@ -41,7 +45,7 @@ const getPlatformIcon = (platform: string) => {
   }
 };
 
-export function Footer() {
+export function Footer({ siteName = 'My Blog' }: FooterProps) {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
 
   useEffect(() => {
@@ -84,7 +88,7 @@ export function Footer() {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            © {new Date().getFullYear()} My Blog. All rights reserved.
+            © {new Date().getFullYear()} {siteName}. All rights reserved.
           </Typography>
           
           {socialLinks.length > 0 && (

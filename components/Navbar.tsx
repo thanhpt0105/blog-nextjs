@@ -18,7 +18,11 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { ThemeToggleButton } from './ThemeToggleButton';
 
-export function Navbar() {
+interface NavbarProps {
+  siteName?: string;
+}
+
+export function Navbar({ siteName = 'My Blog' }: NavbarProps) {
   const { data: session } = useSession();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -51,7 +55,7 @@ export function Navbar() {
                 cursor: 'pointer',
               }}
             >
-              My Blog
+              {siteName}
             </Typography>
           </Link>
 

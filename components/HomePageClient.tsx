@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Box, Chip, Typography, Button } from '@mui/material';
-import { Label, Close } from '@mui/icons-material';
+import { Box, Chip, Typography, Button, TextField, InputAdornment } from '@mui/material';
+import { Label, Close, Search } from '@mui/icons-material';
 import PostListClient from './PostListClient';
 
 interface Post {
@@ -39,20 +39,38 @@ interface HomePageClientProps {
 
 export default function HomePageClient({ posts, tags }: HomePageClientProps) {
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter posts based on selected tags
+  // Filter posts based on selected tags and search query
   const filteredPosts = useMemo(() => {
-    if (selectedTagIds.length === 0) {
-      return posts;
+    let filtered = posts;
+
+    // Filter by tags
+    if (selectedTagIds.length > 0) {
+      // Post must have ALL selected tags (AND logic)
+      filtered = filtered.filter(post =>
+        selectedTagIds.every(selectedTagId =>
+          post.tags.some(postTag => postTag.tag.id === selectedTagId)
+        )
+      );
     }
 
-    // Post must have ALL selected tags (AND logic)
-    return posts.filter(post =>
-      selectedTagIds.every(selectedTagId =>
-        post.tags.some(postTag => postTag.tag.id === selectedTagId)
-      )
-    );
-  }, [posts, selectedTagIds]);
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(post => {
+        const titleMatch = post.title.toLowerCase().includes(query);
+        const excerptMatch = post.excerpt?.toLowerCase().includes(query);
+        const authorMatch = post.author.name?.toLowerCase().includes(query);
+        const tagMatch = post.tags.some(postTag => 
+          postTag.tag.name.toLowerCase().includes(query)
+        );
+        return titleMatch || excerptMatch || authorMatch || tagMatch;
+      });
+    }
+
+    return filtered;
+  }, [posts, selectedTagIds, searchQuery]);
 
   // Get tags that have published posts
   const tagsWithPosts = useMemo(() => {
@@ -71,12 +89,47 @@ export default function HomePageClient({ posts, tags }: HomePageClientProps) {
 
   const clearAllFilters = () => {
     setSelectedTagIds([]);
+    setSearchQuery('');
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
   };
 
   const selectedTags = tagsWithPosts.filter(tag => selectedTagIds.includes(tag.id));
+  const hasActiveFilters = selectedTagIds.length > 0 || searchQuery.trim().length > 0;
 
   return (
     <>
+      {/* Search Box */}
+      <Box sx={{ mb: 4 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search posts by title, content, author, or tags..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery && (
+              <InputAdornment position="end">
+                <Button
+                  size="small"
+                  onClick={clearSearch}
+                  sx={{ minWidth: 'auto' }}
+                >
+                  Clear
+                </Button>
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
+
       {/* Tag Filter Section */}
       {tagsWithPosts.length > 0 && (
         <Box sx={{ mb: 4 }}>
@@ -93,8 +146,8 @@ export default function HomePageClient({ posts, tags }: HomePageClientProps) {
             <Chip
               label={`All Posts (${posts.length})`}
               onClick={clearAllFilters}
-              color={selectedTagIds.length === 0 ? 'primary' : 'default'}
-              variant={selectedTagIds.length === 0 ? 'filled' : 'outlined'}
+              color={!hasActiveFilters ? 'primary' : 'default'}
+              variant={!hasActiveFilters ? 'filled' : 'outlined'}
               sx={{ cursor: 'pointer' }}
             />
             {tagsWithPosts.map((tag) => (
@@ -110,12 +163,26 @@ export default function HomePageClient({ posts, tags }: HomePageClientProps) {
           </Box>
 
           {/* Active Filters Display */}
-          {selectedTagIds.length > 0 && (
+          {hasActiveFilters && (
             <Box sx={{ mt: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                 <Typography variant="body2" color="text.secondary">
-                  Active filters ({filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}):
+                  {searchQuery && selectedTagIds.length > 0 
+                    ? 'Search & tag filters'
+                    : searchQuery 
+                    ? 'Search results'
+                    : 'Active filters'
+                  } ({filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}):
                 </Typography>
+                {searchQuery && (
+                  <Chip
+                    label={`"${searchQuery}"`}
+                    onDelete={clearSearch}
+                    color="secondary"
+                    size="small"
+                    deleteIcon={<Close />}
+                  />
+                )}
                 {selectedTags.map((tag) => (
                   <Chip
                     key={tag.id}
@@ -145,18 +212,23 @@ export default function HomePageClient({ posts, tags }: HomePageClientProps) {
       ) : (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h5" color="text.secondary" gutterBottom>
-            {selectedTagIds.length > 0
-              ? `No posts found with ${selectedTagIds.length === 1 ? 'this tag' : 'these tags'}`
+            {hasActiveFilters
+              ? 'No posts found matching your search criteria'
               : 'No posts yet. Check back soon!'}
           </Typography>
-          {selectedTagIds.length > 0 && (
-            <Button
-              variant="outlined"
-              onClick={clearAllFilters}
-              sx={{ mt: 2 }}
-            >
-              View All Posts
-            </Button>
+          {hasActiveFilters && (
+            <>
+              <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+                Try adjusting your search or filters
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={clearAllFilters}
+                sx={{ mt: 2 }}
+              >
+                Clear All Filters
+              </Button>
+            </>
           )}
         </Box>
       )}

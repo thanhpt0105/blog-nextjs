@@ -133,5 +133,6 @@ model SocialLink {
 
 enum Role {
   USER
+  EDITOR
   ADMIN
 }

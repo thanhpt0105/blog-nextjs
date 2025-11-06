@@ -2,7 +2,7 @@
 
 ## 🚀 Get Started in 3 Steps
 
-### Option 1: Standard Setup (5 minutes)
+### Option 1: Fastest (No Database) ⚡
 
 ```bash
 # 1. Install dependencies
@@ -15,15 +15,36 @@ npm run dev
 open http://localhost:3000
 ```
 
-### Option 2: Docker Setup (2 minutes)
+### Option 2: With Database (Recommended) ⭐
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Start database
+npm run db:start
+
+# 3. Start development server
+npm run dev
+
+# 4. Open browser
+open http://localhost:3000
+```
+
+### Option 3: Full Docker Setup 🐳
 
 ```bash
 # 1. Start all services (Next.js + PostgreSQL + pgAdmin)
-docker-compose up -d
+npm run docker:dev
 
 # 2. Open browser
 open http://localhost:3000
 ```
+
+> **Which to choose?** 
+> - New to project? Start with **Option 1** (no database needed)
+> - Planning to add features? Use **Option 2** (database ready)
+> - Team development? Use **Option 3** (consistent environment)
 
 ## 📝 Add Your First Blog Post
 
@@ -70,21 +91,30 @@ Edit `app/about/page.tsx` with your information
 ## 🐳 Docker Commands
 
 ```bash
-# Start all services
-docker-compose up -d
+# Database only
+npm run db:start         # Start PostgreSQL
+npm run db:stop          # Stop PostgreSQL
+npm run db:restart       # Restart PostgreSQL
+npm run db:logs          # View logs
+npm run db:reset         # Reset (deletes all data!)
 
-# View logs
-docker-compose logs -f
+# pgAdmin (Database UI)
+npm run pgadmin:start    # Start pgAdmin at http://localhost:5050
+npm run pgadmin:stop     # Stop pgAdmin
 
-# Stop all services
-docker-compose down
+# Full Docker environment
+npm run docker:dev       # Start Next.js + DB + pgAdmin
+npm run docker:down      # Stop all services
 
-# Rebuild after changes
-docker-compose up -d --build
-
-# Access PostgreSQL
-docker-compose exec postgres psql -U bloguser -d blogdb
+# Check what's running
+docker ps
 ```
+
+### Access Services
+
+- **Next.js**: http://localhost:3000
+- **pgAdmin**: http://localhost:5050 (email: `admin@blog.com`, password: `admin`)
+- **PostgreSQL**: localhost:5432
 
 ## 🚀 Deploy
 

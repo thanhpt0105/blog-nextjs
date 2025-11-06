@@ -7,7 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "db:start": "docker-compose up -d postgres",
+    "db:stop": "docker-compose stop postgres",
+    "db:restart": "docker-compose restart postgres",
+    "db:logs": "docker-compose logs -f postgres",
+    "db:reset": "docker-compose down -v && docker-compose up -d postgres",
+    "pgadmin:start": "docker-compose --profile tools up -d pgadmin",
+    "pgadmin:stop": "docker-compose stop pgadmin",
+    "docker:dev": "docker-compose --profile full-stack up -d",
+    "docker:down": "docker-compose down"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",

@@ -1,7 +1,46 @@
 version: '3.8'
 
 services:
-  # Next.js Application
+  # PostgreSQL Database (can run standalone)
+  postgres:
+    image: postgres:15-alpine
+    container_name: blog-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-blogdb}
+      - POSTGRES_USER=${POSTGRES_USER:-bloguser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-blogpassword}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bloguser}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin - Database Management UI (optional - only start with --profile tools)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: blog-pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@blog.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - blog-network
+    depends_on:
+      - postgres
+    profiles:
+      - tools
+
+  # Next.js Application (optional - only start with --profile full-stack)
   nextjs-app:
     build:
       context: .
@@ -25,43 +64,8 @@ services:
     networks:
       - blog-network
     command: npm run dev
-
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: blog-postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB:-blogdb}
-      - POSTGRES_USER=${POSTGRES_USER:-bloguser}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-blogpassword}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - blog-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bloguser}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # pgAdmin - Database Management UI
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: blog-pgadmin
-    ports:
-      - "5050:80"
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@blog.com}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    networks:
-      - blog-network
-    depends_on:
-      - postgres
+    profiles:
+      - full-stack
 
 volumes:
   postgres-data:

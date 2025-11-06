@@ -109,25 +109,66 @@ cp .env.example .env.local
 
 Edit `.env.local` with your configuration (defaults should work for local development).
 
-4. **Run the development server**
+4. **Choose your setup** (see detailed guide in [DATABASE_SETUP.md](DATABASE_SETUP.md))
 
+**Option A: Next.js only (fastest, no database)** ⚡
 ```bash
 npm run dev
+# Open http://localhost:3000
 ```
 
-5. **Open your browser**
+**Option B: With database (recommended)** ⭐
+```bash
+# Start database in Docker
+npm run db:start
 
-Navigate to [http://localhost:3000](http://localhost:3000)
+# Start Next.js locally
+npm run dev
+# Open http://localhost:3000
+```
+
+**Option C: Full Docker setup**
+```bash
+# Start everything in Docker
+npm run docker:dev
+# Open http://localhost:3000
+```
+
+> **Note:** The blog works without a database (posts are loaded from MDX files). The database is ready for future features like comments, analytics, etc.
 
 ### Available Scripts
 
+#### Next.js Development
 ```bash
-npm run dev          # Start development server
+npm run dev          # Start development server (port 3000)
 npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint
 npm run type-check   # Run TypeScript type checking
 ```
+
+#### Database Management
+```bash
+npm run db:start     # Start PostgreSQL in Docker
+npm run db:stop      # Stop PostgreSQL
+npm run db:restart   # Restart PostgreSQL
+npm run db:logs      # View database logs
+npm run db:reset     # Reset database (deletes all data)
+```
+
+#### Database UI (pgAdmin)
+```bash
+npm run pgadmin:start  # Start pgAdmin on http://localhost:5050
+npm run pgadmin:stop   # Stop pgAdmin
+```
+
+#### Full Docker Environment
+```bash
+npm run docker:dev   # Start Next.js + PostgreSQL + pgAdmin
+npm run docker:down  # Stop all Docker services
+```
+
+> **See [DATABASE_SETUP.md](DATABASE_SETUP.md) for detailed database usage guide.**
 
 ## 🐳 Docker Setup
 

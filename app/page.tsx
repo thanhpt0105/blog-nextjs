@@ -1,7 +1,7 @@
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import HomePageClient from '@/components/HomePageClient';
+import LazyLoadHomePage from '@/components/LazyLoadHomePage';
 import { getSiteSettings } from '@/lib/settings';
 import { PostRepository, TagRepository } from '@/lib/repositories';
 
@@ -53,8 +53,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </Typography>
       </Box>
 
-      <HomePageClient 
-        posts={postsResult.data} 
+      <LazyLoadHomePage 
+        initialPosts={postsResult.data} 
         tags={tags} 
         pagination={postsResult.pagination}
         initialSearch={searchQuery}

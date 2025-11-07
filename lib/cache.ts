@@ -1,7 +1,7 @@
 import { getCache, setCache, deleteCache, deleteCachePattern } from './redis';
 
 // Cache key patterns
-const CACHE_KEYS = {
+export const CACHE_KEYS = {
   POSTS_LIST: 'posts:list',
   POSTS_PUBLISHED: 'posts:published',
   POST_BY_ID: (id: string) => `post:${id}`,
@@ -9,10 +9,13 @@ const CACHE_KEYS = {
   TAGS_LIST: 'tags:list',
   TAG_BY_ID: (id: string) => `tag:${id}`,
   TAG_BY_SLUG: (slug: string) => `tag:slug:${slug}`,
+  SITE_SETTINGS: 'site:settings',
+  PUBLIC_POSTS: (page: number, limit: number, search: string, tags: string) => 
+    `public:posts:page:${page}:limit:${limit}:search:${search}:tags:${tags}`,
 };
 
 // Cache TTL (in seconds)
-const CACHE_TTL = {
+export const CACHE_TTL = {
   SHORT: 60, // 1 minute
   MEDIUM: 300, // 5 minutes
   LONG: 600, // 10 minutes
@@ -77,6 +80,3 @@ export async function invalidateTagCache(tagId: string, slug?: string) {
 
   await Promise.all(deletions);
 }
-
-// Export cache keys for use in API routes
-export { CACHE_KEYS, CACHE_TTL };

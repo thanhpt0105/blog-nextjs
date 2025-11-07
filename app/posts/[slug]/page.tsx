@@ -6,6 +6,9 @@ import { PostRepository } from '@/lib/repositories';
 import PostContent from '@/components/PostContent';
 import CoverImage from '@/components/CoverImage';
 
+// Enable ISR with 60 second revalidation for blog posts
+export const revalidate = 60;
+
 interface PostPageProps {
   params: {
     slug: string;

@@ -1,10 +1,17 @@
 import { prisma } from '@/lib/prisma';
+import { getCachedTags, setCachedTags } from '@/lib/cache';
 
 export class TagRepository {
   /**
    * Get all tags with published post counts
    */
   static async getAllTags() {
+    // Try cache first
+    const cached = await getCachedTags();
+    if (cached) {
+      return cached;
+    }
+
     const tags = await prisma.tag.findMany({
       orderBy: { name: 'asc' },
       include: {
@@ -17,6 +24,9 @@ export class TagRepository {
         },
       },
     });
+
+    // Cache the result (10 minutes TTL)
+    await setCachedTags(tags);
 
     return tags;
   }

@@ -5,9 +5,20 @@ import { Footer } from '@/components/Footer';
 import Box from '@mui/material/Box';
 import { Metadata } from 'next';
 import { getSiteSettings } from '@/lib/settings';
+import { unstable_cache } from 'next/cache';
+
+// Cache the settings with a 5 minute revalidation
+const getCachedSettings = unstable_cache(
+  async () => getSiteSettings(),
+  ['site-settings'],
+  { 
+    revalidate: 300, // 5 minutes
+    tags: ['settings']
+  }
+);
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings();
+  const settings = await getCachedSettings();
 
   return {
     title: {
@@ -38,7 +49,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getSiteSettings();
+  const settings = await getCachedSettings();
 
   return (
     <html lang="en">

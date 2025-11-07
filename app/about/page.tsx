@@ -5,6 +5,9 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import { Metadata } from 'next';
 
+// Static page - can be cached indefinitely
+export const revalidate = 86400; // 24 hours
+
 export const metadata: Metadata = {
   title: 'About',
   description: 'Learn more about me and this blog',

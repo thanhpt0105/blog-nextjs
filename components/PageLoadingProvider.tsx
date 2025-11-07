@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Box, LinearProgress, Fade } from '@mui/material';
 
@@ -22,13 +22,27 @@ interface PageLoadingProviderProps {
   children: ReactNode;
 }
 
-export default function PageLoadingProvider({ children }: PageLoadingProviderProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showContent, setShowContent] = useState(true);
+// Component that uses useSearchParams - needs Suspense
+function RouteChangeDetector({ 
+  onRouteChange 
+}: { 
+  onRouteChange: () => void 
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    onRouteChange();
+  }, [pathname, searchParams, onRouteChange]);
+
+  return null;
+}
+
+export default function PageLoadingProvider({ children }: PageLoadingProviderProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [showContent, setShowContent] = useState(true);
+
+  const handleRouteChange = () => {
     // Start loading on route change
     setIsLoading(true);
     setShowContent(false);
@@ -40,7 +54,7 @@ export default function PageLoadingProvider({ children }: PageLoadingProviderPro
     }, 300); // 300ms minimum for smooth animation
 
     return () => clearTimeout(timer);
-  }, [pathname, searchParams]);
+  };
 
   const startLoading = () => {
     setIsLoading(true);
@@ -54,6 +68,11 @@ export default function PageLoadingProvider({ children }: PageLoadingProviderPro
 
   return (
     <PageLoadingContext.Provider value={{ isLoading, startLoading, stopLoading }}>
+      {/* Route change detector wrapped in Suspense */}
+      <Suspense fallback={null}>
+        <RouteChangeDetector onRouteChange={handleRouteChange} />
+      </Suspense>
+
       {/* Top Loading Bar */}
       <Box
         sx={{

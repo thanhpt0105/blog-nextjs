@@ -22,6 +22,23 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis Cache (can run standalone)
+  redis:
+    image: redis:7-alpine
+    container_name: blog-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - blog-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # pgAdmin - Database Management UI (optional - only start with --profile tools)
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -59,8 +76,11 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-blogdb}
       - POSTGRES_USER=${POSTGRES_USER:-bloguser}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-blogpassword}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       - postgres
+      - redis
     networks:
       - blog-network
     command: npm run dev
@@ -69,6 +89,8 @@ services:
 
 volumes:
   postgres-data:
+    driver: local
+  redis-data:
     driver: local
   pgadmin-data:
     driver: local

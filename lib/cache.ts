@@ -1,0 +1,82 @@
+import { getCache, setCache, deleteCache, deleteCachePattern } from './redis';
+
+// Cache key patterns
+const CACHE_KEYS = {
+  POSTS_LIST: 'posts:list',
+  POSTS_PUBLISHED: 'posts:published',
+  POST_BY_ID: (id: string) => `post:${id}`,
+  POST_BY_SLUG: (slug: string) => `post:slug:${slug}`,
+  TAGS_LIST: 'tags:list',
+  TAG_BY_ID: (id: string) => `tag:${id}`,
+  TAG_BY_SLUG: (slug: string) => `tag:slug:${slug}`,
+};
+
+// Cache TTL (in seconds)
+const CACHE_TTL = {
+  SHORT: 60, // 1 minute
+  MEDIUM: 300, // 5 minutes
+  LONG: 600, // 10 minutes
+};
+
+// Posts caching
+export async function getCachedPosts(cacheKey: string) {
+  return await getCache(cacheKey);
+}
+
+export async function setCachedPosts(cacheKey: string, posts: any, ttl: number = CACHE_TTL.MEDIUM) {
+  return await setCache(cacheKey, posts, ttl);
+}
+
+export async function invalidatePostsCache() {
+  await Promise.all([
+    deleteCache(CACHE_KEYS.POSTS_LIST),
+    deleteCache(CACHE_KEYS.POSTS_PUBLISHED),
+    deleteCachePattern('post:*'),
+  ]);
+}
+
+export async function invalidatePostCache(postId: string, slug?: string) {
+  const deletions = [
+    deleteCache(CACHE_KEYS.POST_BY_ID(postId)),
+    deleteCache(CACHE_KEYS.POSTS_LIST),
+    deleteCache(CACHE_KEYS.POSTS_PUBLISHED),
+  ];
+
+  if (slug) {
+    deletions.push(deleteCache(CACHE_KEYS.POST_BY_SLUG(slug)));
+  }
+
+  await Promise.all(deletions);
+}
+
+// Tags caching
+export async function getCachedTags() {
+  return await getCache(CACHE_KEYS.TAGS_LIST);
+}
+
+export async function setCachedTags(tags: any, ttl: number = CACHE_TTL.LONG) {
+  return await setCache(CACHE_KEYS.TAGS_LIST, tags, ttl);
+}
+
+export async function invalidateTagsCache() {
+  await Promise.all([
+    deleteCache(CACHE_KEYS.TAGS_LIST),
+    deleteCachePattern('tag:*'),
+  ]);
+}
+
+export async function invalidateTagCache(tagId: string, slug?: string) {
+  const deletions = [
+    deleteCache(CACHE_KEYS.TAG_BY_ID(tagId)),
+    deleteCache(CACHE_KEYS.TAGS_LIST),
+  ];
+
+  if (slug) {
+    deletions.push(deleteCache(CACHE_KEYS.TAG_BY_SLUG(slug)));
+  }
+
+  await Promise.all(deletions);
+}
+
+// Export cache keys for use in API routes
+export { CACHE_KEYS, CACHE_TTL };

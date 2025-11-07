@@ -76,12 +76,12 @@ model Post {
   excerpt     String?
   coverImage  String?
   published   Boolean  @default(false)
-  authorId    String
+  authorId    String?  // Made nullable to support orphaned posts
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   publishedAt DateTime?
 
-  author User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
   tags   PostTag[]
 
   @@index([slug])

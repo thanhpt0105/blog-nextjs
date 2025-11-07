@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { PostRepository } from '@/lib/repositories';
 import PostContent from '@/components/PostContent';
 import CoverImage from '@/components/CoverImage';
+import { getAuthorName, getAuthorInitial, getAuthorImage } from '@/lib/utils/author';
 
 // Enable ISR with 60 second revalidation for blog posts
 export const revalidate = 60;
@@ -57,14 +58,14 @@ export default async function PostPage({ params }: PostPageProps) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Avatar 
                 sx={{ width: 40, height: 40 }}
-                src={post.author.image || undefined}
-                alt={post.author.name || post.author.email}
+                src={getAuthorImage(post.author)}
+                alt={getAuthorName(post.author)}
               >
-                {!post.author.image && (post.author.name || post.author.email).charAt(0).toUpperCase()}
+                {getAuthorInitial(post.author)}
               </Avatar>
               <Box>
                 <Typography variant="body2" fontWeight={500}>
-                  {post.author.name || post.author.email}
+                  {getAuthorName(post.author)}
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
                   <CalendarMonth fontSize="small" />

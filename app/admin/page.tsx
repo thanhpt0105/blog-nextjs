@@ -25,6 +25,7 @@ import {
   Add,
 } from '@mui/icons-material';
 import Link from 'next/link';
+import { getAuthorName } from '@/lib/utils/author';
 
 async function getDashboardStats() {
   const [totalPosts, publishedPosts, totalUsers, recentPosts] = await Promise.all([
@@ -217,7 +218,7 @@ export default async function AdminPage() {
                     </TableCell>
                     <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                       <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                        {post.author.name || post.author.email}
+                        {getAuthorName(post.author)}
                       </Typography>
                     </TableCell>
                     <TableCell>

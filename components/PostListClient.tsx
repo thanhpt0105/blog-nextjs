@@ -5,6 +5,7 @@ import { CalendarMonth, Person } from '@mui/icons-material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { getAuthorName, getAuthorInitial, getAuthorImage } from '@/lib/utils/author';
 
 interface Post {
   id: string;
@@ -17,7 +18,7 @@ interface Post {
     name: string | null;
     email: string;
     image: string | null;
-  };
+  } | null;
   tags: Array<{
     tag: {
       id: string;
@@ -143,12 +144,12 @@ export default function PostListClient({ posts }: PostListClientProps) {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Avatar 
                     sx={{ width: 24, height: 24 }}
-                    src={post.author.image || undefined}
-                    alt={post.author.name || post.author.email}
+                    src={getAuthorImage(post.author)}
+                    alt={getAuthorName(post.author)}
                   >
-                    {!post.author.image && (post.author.name || post.author.email).charAt(0).toUpperCase()}
+                    {getAuthorInitial(post.author)}
                   </Avatar>
-                  <span>{post.author.name || post.author.email}</span>
+                  <span>{getAuthorName(post.author)}</span>
                 </Box>
                 {post.publishedAt && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

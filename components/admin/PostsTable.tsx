@@ -29,6 +29,7 @@ import {
   Delete,
   Visibility,
 } from '@mui/icons-material';
+import { getAuthorName, getAuthorInitial, getAuthorImage } from '@/lib/utils/author';
 import Link from 'next/link';
 
 interface Post {
@@ -41,7 +42,7 @@ interface Post {
     name: string | null;
     email: string;
     image: string | null;
-  };
+  } | null;
   tags: Array<{
     tag: {
       id: string;
@@ -165,13 +166,13 @@ export default function PostsTable({ posts }: PostsTableProps) {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Avatar 
                           sx={{ width: 28, height: 28 }}
-                          src={post.author.image || undefined}
-                          alt={post.author.name || post.author.email}
+                          src={getAuthorImage(post.author)}
+                          alt={getAuthorName(post.author)}
                         >
-                          {!post.author.image && (post.author.name || post.author.email).charAt(0).toUpperCase()}
+                          {getAuthorInitial(post.author)}
                         </Avatar>
                         <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
-                          {post.author.name || post.author.email}
+                          {getAuthorName(post.author)}
                         </Typography>
                       </Box>
                     </TableCell>

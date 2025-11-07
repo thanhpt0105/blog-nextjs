@@ -323,7 +323,7 @@ export default function LazyLoadHomePage({
             )}
             {!loading && !hasMore && posts.length > 0 && (
               <Typography variant="body2" color="text.secondary">
-                You've reached the end! ({posts.length} of {totalPosts} posts shown)
+                You&apos;ve reached the end! ({posts.length} of {totalPosts} posts shown)
               </Typography>
             )}
           </Box>

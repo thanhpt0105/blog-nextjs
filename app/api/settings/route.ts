@@ -4,6 +4,10 @@ import { prisma } from '@/lib/prisma';
 import { clearSettingsCache } from '@/lib/settings';
 import { revalidatePath } from 'next/cache';
 
+// Force Node.js runtime for this API route (not Edge)
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const settings = await prisma.siteSetting.findMany();
@@ -48,8 +52,14 @@ export async function PUT(request: NextRequest) {
     // Clear the settings cache so new values are fetched
     clearSettingsCache();
 
-    // Revalidate all pages to pick up new settings
-    revalidatePath('/', 'layout');
+    // Revalidate pages to pick up new settings
+    try {
+      revalidatePath('/');
+      revalidatePath('/admin');
+    } catch (revalidateError) {
+      // Revalidation failure shouldn't break the update
+      console.error('Revalidation error (non-critical):', revalidateError);
+    }
 
     return NextResponse.json({ message: 'Settings updated successfully' });
   } catch (error) {

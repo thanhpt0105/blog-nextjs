@@ -39,7 +39,21 @@ echo "🌱 Running seed script with production database..."
 echo ""
 
 # Run seed with production environment explicitly
-DATABASE_URL=$(grep "^DATABASE_URL=" .env.production.local | cut -d'=' -f2- | tr -d '"') npx prisma db seed
+# Use direct connection (non-pooling) for migrations/seeding
+DATABASE_URL=$(grep "^DATABASE_POSTGRES_URL_NON_POOLING=" .env.production.local | cut -d'=' -f2- | tr -d '"')
+
+if [ -z "$DATABASE_URL" ]; then
+    # Fallback to old DATABASE_URL if exists
+    DATABASE_URL=$(grep "^DATABASE_URL=" .env.production.local | cut -d'=' -f2- | tr -d '"')
+fi
+
+if [ -z "$DATABASE_URL" ]; then
+    echo "❌ No DATABASE_URL found in .env.production.local"
+    echo "Looking for: DATABASE_POSTGRES_URL_NON_POOLING or DATABASE_URL"
+    exit 1
+fi
+
+DATABASE_URL="$DATABASE_URL" npx prisma db seed
 
 echo ""
 echo "🎉 Seed completed successfully!"

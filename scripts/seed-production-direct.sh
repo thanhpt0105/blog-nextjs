@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Quick Seed Production Database
-# Seeds production database using direct DATABASE_URL
+# Seeds production database using direct connection URL
 
 echo "🌱 Production Database Seed (Direct)"
 echo "====================================="
@@ -11,16 +11,18 @@ echo ""
 if [ ! -f .env.production.local ]; then
     echo "❌ .env.production.local not found"
     echo ""
-    echo "Please create it with your production DATABASE_URL:"
-    echo "  DATABASE_URL=\"postgresql://...\""
+    echo "Please create it with your production DATABASE URLs:"
+    echo "  DATABASE_POSTGRES_PRISMA_URL=\"postgresql://...\""
+    echo "  DATABASE_POSTGRES_URL_NON_POOLING=\"postgresql://...\""
     echo ""
-    echo "You can get it from Vercel Dashboard → Storage → Postgres → .env.local tab"
+    echo "You can get them from Vercel Dashboard → Storage → Postgres"
     exit 1
 fi
 
-# Check if DATABASE_URL is set in the file
-if ! grep -q "DATABASE_URL" .env.production.local; then
-    echo "❌ DATABASE_URL not found in .env.production.local"
+# Check if DATABASE URLs are set in the file
+if ! grep -q "DATABASE_POSTGRES" .env.production.local; then
+    echo "❌ DATABASE_POSTGRES_* variables not found in .env.production.local"
+    echo "Looking for: DATABASE_POSTGRES_PRISMA_URL or DATABASE_POSTGRES_URL_NON_POOLING"
     exit 1
 fi
 

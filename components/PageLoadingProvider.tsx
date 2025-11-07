@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, Suspense } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, Suspense, useCallback } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Box, LinearProgress, Fade } from '@mui/material';
 
@@ -42,19 +42,17 @@ export default function PageLoadingProvider({ children }: PageLoadingProviderPro
   const [isLoading, setIsLoading] = useState(false);
   const [showContent, setShowContent] = useState(true);
 
-  const handleRouteChange = () => {
+  const handleRouteChange = useCallback(() => {
     // Start loading on route change
     setIsLoading(true);
     setShowContent(false);
 
     // Simulate minimum loading time for smooth transition
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       setIsLoading(false);
       setShowContent(true);
     }, 300); // 300ms minimum for smooth animation
-
-    return () => clearTimeout(timer);
-  };
+  }, []);
 
   const startLoading = () => {
     setIsLoading(true);

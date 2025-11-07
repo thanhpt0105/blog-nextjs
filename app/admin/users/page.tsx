@@ -39,6 +39,11 @@ export default async function UsersPage() {
     redirect('/login');
   }
 
+  // Only ADMIN can access users page
+  if (session.user?.role !== 'ADMIN') {
+    redirect('/admin');
+  }
+
   const users = await getUsers();
 
   return (

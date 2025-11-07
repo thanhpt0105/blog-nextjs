@@ -1,5 +1,6 @@
 import { ThemeRegistry } from '@/components/ThemeRegistry';
 import { AuthProvider } from '@/components/AuthProvider';
+import PageLoadingProvider from '@/components/PageLoadingProvider';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import Box from '@mui/material/Box';
@@ -45,19 +46,21 @@ export default async function RootLayout({
       <body style={{ margin: 0 }}>
         <AuthProvider>
           <ThemeRegistry>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: '100vh',
-              }}
-            >
-              <Navbar siteName={settings.site_name} />
-              <Box component="main" sx={{ flexGrow: 1, py: 4 }}>
-                {children}
+            <PageLoadingProvider>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  minHeight: '100vh',
+                }}
+              >
+                <Navbar siteName={settings.site_name} />
+                <Box component="main" sx={{ flexGrow: 1, py: 4 }}>
+                  {children}
+                </Box>
+                <Footer siteName={settings.site_name} />
               </Box>
-              <Footer siteName={settings.site_name} />
-            </Box>
+            </PageLoadingProvider>
           </ThemeRegistry>
         </AuthProvider>
       </body>

@@ -31,6 +31,7 @@ import {
   AccountCircle,
 } from '@mui/icons-material';
 import Link from 'next/link';
+import PageLink from './PageLink';
 import { useSession, signOut } from 'next-auth/react';
 import { ThemeToggleButton } from './ThemeToggleButton';
 

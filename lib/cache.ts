@@ -22,7 +22,7 @@ export const CACHE_TTL = {
 };
 
 // Posts caching
-export async function getCachedPosts(cacheKey: string) {
+export async function getCachedPosts(cacheKey: string): Promise<any | null> {
   return await getCache(cacheKey);
 }
 
@@ -53,7 +53,7 @@ export async function invalidatePostCache(postId: string, slug?: string) {
 }
 
 // Tags caching
-export async function getCachedTags() {
+export async function getCachedTags(): Promise<any | null> {
   return await getCache(CACHE_KEYS.TAGS_LIST);
 }
 

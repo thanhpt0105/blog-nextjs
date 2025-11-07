@@ -27,7 +27,7 @@ export class PostRepository {
   /**
    * Get paginated posts with filters
    */
-  static async getPosts(params: GetPostsParams = {}) {
+  static async getPosts(params: GetPostsParams = {}): Promise<PaginatedResult<any>> {
     const {
       page = 1,
       limit = 10,

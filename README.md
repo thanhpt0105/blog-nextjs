@@ -218,69 +218,6 @@ docker-compose up -d --build
    - Username: `bloguser`
    - Password: `blogpassword`
 
-## 📝 Adding New Posts
-
-### Step 1: Create a new MDX file
-
-Create a new file in `content/posts/` with a `.mdx` extension:
-
-```bash
-touch content/posts/my-new-post.mdx
-```
-
-### Step 2: Add frontmatter
-
-Every post must start with frontmatter (metadata) in YAML format:
-
-```mdx
----
-title: "Your Post Title"
-date: "2024-03-15"
-excerpt: "A brief description of your post that appears in the list view"
-tags: ["React", "TypeScript", "Web Development"]
-author: "Your Name"
-readTime: "5 min read"
----
-
-# Your Post Title
-
-Your content goes here...
-```
-
-### Step 3: Write your content
-
-Use standard Markdown syntax:
-
-```markdown
-## Heading 2
-### Heading 3
-
-Regular paragraph text.
-
-- Bullet list item 1
-- Bullet list item 2
-
-1. Numbered list item 1
-2. Numbered list item 2
-
-**Bold text** and *italic text*
-
-[Link text](https://example.com)
-
-`inline code`
-
-\```typescript
-// Code block
-const example = "TypeScript code";
-\```
-
-> Blockquote text
-```
-
-### Step 4: Preview your post
-
-The post will automatically appear on the homepage and be accessible at `/blog/my-new-post`
-
 ## 🎨 Customization
 
 ### Changing Theme Colors
@@ -429,10 +366,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-- **Author**: Your Name
-- **Email**: your.email@example.com
-- **GitHub**: [@yourusername](https://github.com/yourusername)
-- **Twitter**: [@yourusername](https://twitter.com/yourusername)
+- **Author**: Thanh
+- **Email**: thanhpt0105@gmail.com
 
 ---
 

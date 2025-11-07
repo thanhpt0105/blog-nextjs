@@ -16,6 +16,7 @@ interface Post {
   author: {
     name: string | null;
     email: string;
+    image: string | null;
   };
   tags: Array<{
     tag: {

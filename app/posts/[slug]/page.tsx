@@ -3,6 +3,8 @@ import { CalendarMonth, Person } from '@mui/icons-material';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { PostRepository } from '@/lib/repositories';
+import PostContent from '@/components/PostContent';
+import CoverImage from '@/components/CoverImage';
 
 interface PostPageProps {
   params: {
@@ -50,8 +52,12 @@ export default async function PostPage({ params }: PostPageProps) {
           {/* Meta info */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, my: 3, flexWrap: 'wrap' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Avatar sx={{ width: 40, height: 40 }}>
-                {(post.author.name || post.author.email).charAt(0).toUpperCase()}
+              <Avatar 
+                sx={{ width: 40, height: 40 }}
+                src={post.author.image || undefined}
+                alt={post.author.name || post.author.email}
+              >
+                {!post.author.image && (post.author.name || post.author.email).charAt(0).toUpperCase()}
               </Avatar>
               <Box>
                 <Typography variant="body2" fontWeight={500}>
@@ -98,116 +104,11 @@ export default async function PostPage({ params }: PostPageProps) {
 
         {/* Cover Image */}
         {post.coverImage && (
-          <Box
-            sx={{
-              mb: 4,
-              borderRadius: 2,
-              overflow: 'hidden',
-              position: 'relative',
-              width: '100%',
-              height: 'auto',
-            }}
-          >
-            <img 
-              src={post.coverImage} 
-              alt={post.title}
-              style={{
-                width: '100%',
-                height: 'auto',
-                display: 'block',
-              }}
-              onError={(e) => {
-                // Hide image if it fails to load
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          </Box>
+          <CoverImage src={post.coverImage} alt={post.title} />
         )}
 
         {/* Content */}
-        <Box
-          sx={{
-            '& h1, & h2, & h3, & h4, & h5, & h6': {
-              mt: 4,
-              mb: 2,
-              fontWeight: 600,
-            },
-            '& h1': { fontSize: '2rem' },
-            '& h2': { fontSize: '1.75rem' },
-            '& h3': { fontSize: '1.5rem' },
-            '& p': {
-              mb: 2,
-              lineHeight: 1.8,
-            },
-            '& a': {
-              color: 'primary.main',
-              textDecoration: 'underline',
-            },
-            '& ul, & ol': {
-              mb: 2,
-              pl: 4,
-            },
-            '& li': {
-              mb: 1,
-            },
-            '& code': {
-              backgroundColor: 'rgba(0, 0, 0, 0.05)',
-              padding: '0.2em 0.4em',
-              borderRadius: '3px',
-              fontSize: '0.9em',
-              fontFamily: 'monospace',
-            },
-            '& pre': {
-              backgroundColor: 'rgba(0, 0, 0, 0.05)',
-              padding: 2,
-              borderRadius: 1,
-              overflow: 'auto',
-              mb: 2,
-              '& code': {
-                backgroundColor: 'transparent',
-                padding: 0,
-              },
-            },
-            '& blockquote': {
-              borderLeft: '4px solid',
-              borderColor: 'primary.main',
-              pl: 2,
-              py: 1,
-              my: 2,
-              fontStyle: 'italic',
-              color: 'text.secondary',
-            },
-            '& img': {
-              maxWidth: '100%',
-              height: 'auto',
-              borderRadius: 1,
-              my: 2,
-              display: 'block',
-            },
-            '& hr': {
-              my: 4,
-              border: 'none',
-              borderTop: '1px solid',
-              borderColor: 'divider',
-            },
-            '& table': {
-              width: '100%',
-              borderCollapse: 'collapse',
-              mb: 2,
-            },
-            '& th, & td': {
-              border: '1px solid',
-              borderColor: 'divider',
-              padding: 1,
-              textAlign: 'left',
-            },
-            '& th': {
-              backgroundColor: 'action.hover',
-              fontWeight: 600,
-            },
-          }}
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        <PostContent content={post.content} />
       </Box>
     </Container>
   );

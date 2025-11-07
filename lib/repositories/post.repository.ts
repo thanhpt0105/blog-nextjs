@@ -90,6 +90,7 @@ export class PostRepository {
             select: {
               name: true,
               email: true,
+              image: true,
             },
           },
           tags: {
@@ -130,6 +131,7 @@ export class PostRepository {
           select: {
             name: true,
             email: true,
+            image: true,
           },
         },
         tags: {
@@ -159,6 +161,7 @@ export class PostRepository {
           select: {
             name: true,
             email: true,
+            image: true,
           },
         },
         tags: {
@@ -183,6 +186,7 @@ export class PostRepository {
           select: {
             name: true,
             email: true,
+            image: true,
           },
         },
         tags: {
@@ -226,6 +230,7 @@ export class PostRepository {
           select: {
             name: true,
             email: true,
+            image: true,
           },
         },
         tags: {

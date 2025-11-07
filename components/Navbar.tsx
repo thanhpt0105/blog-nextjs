@@ -87,8 +87,12 @@ export function Navbar({ siteName = 'My Blog' }: NavbarProps) {
                   aria-haspopup="true"
                   aria-expanded={open ? 'true' : undefined}
                 >
-                  <Avatar sx={{ width: 32, height: 32 }}>
-                    {(session.user.name || session.user.email || 'U').charAt(0).toUpperCase()}
+                  <Avatar 
+                    sx={{ width: 32, height: 32 }}
+                    src={session.user.image || undefined}
+                    alt={session.user.name || session.user.email || 'User'}
+                  >
+                    {!session.user.image && (session.user.name || session.user.email || 'U').charAt(0).toUpperCase()}
                   </Avatar>
                 </IconButton>
                 <Menu
@@ -107,12 +111,20 @@ export function Navbar({ siteName = 'My Blog' }: NavbarProps) {
                   </MenuItem>
                   <Divider />
                   {(session.user.role === 'ADMIN' || session.user.role === 'EDITOR') && (
-                    <MenuItem component={Link} href="/admin">
-                      <ListItemIcon>
-                        <Dashboard fontSize="small" />
-                      </ListItemIcon>
-                      Admin Panel
-                    </MenuItem>
+                    <>
+                      <MenuItem component={Link} href="/admin">
+                        <ListItemIcon>
+                          <Dashboard fontSize="small" />
+                        </ListItemIcon>
+                        Admin Panel
+                      </MenuItem>
+                      <MenuItem component={Link} href="/admin/profile">
+                        <ListItemIcon>
+                          <Avatar sx={{ width: 20, height: 20 }} />
+                        </ListItemIcon>
+                        My Profile
+                      </MenuItem>
+                    </>
                   )}
                   <MenuItem onClick={handleSignOut}>
                     <ListItemIcon>

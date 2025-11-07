@@ -29,6 +29,7 @@ import {
   Logout,
   AccountCircle,
   Label,
+  Public,
 } from '@mui/icons-material';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -41,6 +42,7 @@ const allMenuItems = [
   { text: 'Blog Posts', icon: <Article />, href: '/admin/posts', roles: ['ADMIN', 'EDITOR'] },
   { text: 'Tags', icon: <Label />, href: '/admin/tags', roles: ['ADMIN', 'EDITOR'] },
   { text: 'Users', icon: <People />, href: '/admin/users', roles: ['ADMIN'] },
+  { text: 'My Profile', icon: <AccountCircle />, href: '/admin/profile', roles: ['ADMIN', 'EDITOR'] },
   { text: 'Settings', icon: <Settings />, href: '/admin/settings', roles: ['ADMIN'] },
   { text: 'Social Links', icon: <LinkIcon />, href: '/admin/social-links', roles: ['ADMIN'] },
 ];
@@ -156,11 +158,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 onClick={handleMenu}
                 color="inherit"
               >
-                {session.user.image ? (
-                  <Avatar src={session.user.image} sx={{ width: 32, height: 32 }} />
-                ) : (
-                  <AccountCircle />
-                )}
+                <Avatar 
+                  src={session.user.image || undefined} 
+                  alt={session.user.name || session.user.email || 'User'}
+                  sx={{ width: 32, height: 32 }}
+                >
+                  {!session.user.image && (session.user.name || session.user.email || 'U').charAt(0).toUpperCase()}
+                </Avatar>
               </IconButton>
             </Box>
           )}
@@ -185,7 +189,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               </Typography>
             </MenuItem>
             <Divider />
+            <MenuItem component={Link} href="/admin/profile" onClick={handleClose}>
+              <ListItemIcon>
+                <AccountCircle fontSize="small" />
+              </ListItemIcon>
+              My Profile
+            </MenuItem>
             <MenuItem component={Link} href="/" onClick={handleClose}>
+              <ListItemIcon>
+                <Public fontSize="small" />
+              </ListItemIcon>
               View Site
             </MenuItem>
             <MenuItem onClick={handleSignOut}>

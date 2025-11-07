@@ -1,9 +1,10 @@
 'use client';
 
-import { Card, CardContent, CardMedia, Typography, Box, Chip, Grid } from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip, Grid, Avatar } from '@mui/material';
 import { CalendarMonth, Person } from '@mui/icons-material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface Post {
   id: string;
@@ -15,6 +16,7 @@ interface Post {
   author: {
     name: string | null;
     email: string;
+    image: string | null;
   };
   tags: Array<{
     tag: {
@@ -31,9 +33,14 @@ interface PostListClientProps {
 
 export default function PostListClient({ posts }: PostListClientProps) {
   const router = useRouter();
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   const handleCardClick = (slug: string) => {
     router.push(`/posts/${slug}`);
+  };
+
+  const handleImageError = (postId: string) => {
+    setFailedImages(prev => new Set(prev).add(postId));
   };
 
   return (
@@ -54,18 +61,25 @@ export default function PostListClient({ posts }: PostListClientProps) {
               },
             }}
           >
-            {post.coverImage && (
-              <CardMedia
-                component="img"
-                height="200"
-                image={post.coverImage}
-                alt={post.title}
-                sx={{ objectFit: 'cover' }}
-                onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                  // Hide the image if it fails to load
-                  e.currentTarget.style.display = 'none';
+            {post.coverImage && !failedImages.has(post.id) && (
+              <Box
+                sx={{
+                  height: 200,
+                  overflow: 'hidden',
+                  position: 'relative',
                 }}
-              />
+              >
+                <img
+                  src={post.coverImage}
+                  alt={post.title}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                  onError={() => handleImageError(post.id)}
+                />
+              </Box>
             )}
             <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h5" component="h2" gutterBottom>
@@ -121,12 +135,19 @@ export default function PostListClient({ posts }: PostListClientProps) {
                   display: 'flex',
                   gap: 2,
                   flexWrap: 'wrap',
+                  alignItems: 'center',
                   fontSize: '0.875rem',
                   color: 'text.secondary',
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Person fontSize="small" />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Avatar 
+                    sx={{ width: 24, height: 24 }}
+                    src={post.author.image || undefined}
+                    alt={post.author.name || post.author.email}
+                  >
+                    {!post.author.image && (post.author.name || post.author.email).charAt(0).toUpperCase()}
+                  </Avatar>
                   <span>{post.author.name || post.author.email}</span>
                 </Box>
                 {post.publishedAt && (

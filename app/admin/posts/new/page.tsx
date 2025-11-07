@@ -18,6 +18,7 @@ import {
 import { Save, ArrowBack } from '@mui/icons-material';
 import Link from 'next/link';
 import TiptapEditor from '@/components/TiptapEditor';
+import ImageUpload from '@/components/ImageUpload';
 
 interface Tag {
   id: string;
@@ -205,13 +206,12 @@ export default function NewPostPage() {
               <Typography variant="h6" gutterBottom>
                 Featured Image
               </Typography>
-              <TextField
-                fullWidth
-                label="Image URL"
-                value={formData.coverImage}
-                onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-                placeholder="https://..."
-                helperText="Enter image URL or upload (coming soon)"
+              <ImageUpload
+                type="cover"
+                variant="cover"
+                currentImage={formData.coverImage}
+                onUploadComplete={(url) => setFormData({ ...formData, coverImage: url })}
+                onDelete={() => setFormData({ ...formData, coverImage: '' })}
               />
             </Paper>
 

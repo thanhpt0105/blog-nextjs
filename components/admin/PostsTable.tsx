@@ -21,6 +21,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Avatar,
 } from '@mui/material';
 import {
   Search,
@@ -39,6 +40,7 @@ interface Post {
   author: {
     name: string | null;
     email: string;
+    image: string | null;
   };
   tags: Array<{
     tag: {
@@ -159,7 +161,18 @@ export default function PostsTable({ posts }: PostsTableProps) {
                       )}
                     </TableCell>
                     <TableCell>
-                      {post.author.name || post.author.email}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Avatar 
+                          sx={{ width: 32, height: 32 }}
+                          src={post.author.image || undefined}
+                          alt={post.author.name || post.author.email}
+                        >
+                          {!post.author.image && (post.author.name || post.author.email).charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Typography variant="body2">
+                          {post.author.name || post.author.email}
+                        </Typography>
+                      </Box>
                     </TableCell>
                     <TableCell>
                       <Chip

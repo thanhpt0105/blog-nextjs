@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth-server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { getCachedPosts, setCachedPosts, invalidatePostsCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache';
 
 const postSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -24,6 +25,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Try cache first
+    const cached = await getCachedPosts(CACHE_KEYS.POSTS_LIST);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
     const posts = await prisma.post.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
@@ -40,6 +47,9 @@ export async function GET(request: NextRequest) {
         },
       },
     });
+
+    // Cache the result
+    await setCachedPosts(CACHE_KEYS.POSTS_LIST, posts, CACHE_TTL.MEDIUM);
 
     return NextResponse.json(posts);
   } catch (error) {
@@ -107,6 +117,9 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Invalidate posts cache
+    await invalidatePostsCache();
 
     return NextResponse.json(post, { status: 201 });
   } catch (error) {

@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { getCache, setCache, deleteCache } from './redis';
 
 export interface SiteSettings {
   site_name: string;
@@ -6,14 +7,14 @@ export interface SiteSettings {
   posts_per_page: string;
 }
 
-let cachedSettings: SiteSettings | null = null;
-let cacheTime: number = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const SETTINGS_CACHE_KEY = 'site:settings';
+const CACHE_TTL = 5 * 60; // 5 minutes
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  // Return cached settings if still valid
-  if (cachedSettings && Date.now() - cacheTime < CACHE_DURATION) {
-    return cachedSettings;
+  // Try Redis cache first
+  const cached = await getCache<SiteSettings>(SETTINGS_CACHE_KEY);
+  if (cached) {
+    return cached;
   }
 
   try {
@@ -29,10 +30,12 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       settingsObj[setting.key] = setting.value;
     });
 
-    cachedSettings = settingsObj;
-    cacheTime = Date.now();
+    const result = settingsObj as SiteSettings;
+    
+    // Cache in Redis
+    await setCache(SETTINGS_CACHE_KEY, result, CACHE_TTL);
 
-    return settingsObj as SiteSettings;
+    return result;
   } catch (error) {
     console.error('Failed to fetch site settings:', error);
     
@@ -45,7 +48,6 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   }
 }
 
-export function clearSettingsCache() {
-  cachedSettings = null;
-  cacheTime = 0;
+export async function clearSettingsCache() {
+  await deleteCache(SETTINGS_CACHE_KEY);
 }

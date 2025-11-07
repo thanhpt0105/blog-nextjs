@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth-server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { invalidatePostCache, invalidatePostsCache } from '@/lib/cache';
 
 const postSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -171,6 +172,9 @@ export async function PUT(
       { error: 'Internal server error' },
       { status: 500 }
     );
+  } finally {
+    // Invalidate cache after update
+    await invalidatePostCache(params.id);
   }
 }
 
@@ -215,6 +219,9 @@ export async function DELETE(
     await prisma.post.delete({
       where: { id: params.id },
     });
+
+    // Invalidate cache after deletion
+    await invalidatePostCache(params.id, existingPost.slug);
 
     return NextResponse.json({ success: true });
   } catch (error) {

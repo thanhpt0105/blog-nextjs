@@ -33,7 +33,7 @@ interface User {
   name: string | null;
   email: string;
   role: string;
-  createdAt: string;
+  createdAt: string | Date;
   _count: {
     posts: number;
   };

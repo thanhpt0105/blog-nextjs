@@ -37,7 +37,7 @@ export default function AboutPage() {
             and even the sample blog content you see here.
           </Typography>
           <Typography variant="body1" paragraph>
-            It showcases what's possible when combining modern web technologies with AI-assisted 
+            It showcases what&apos;s possible when combining modern web technologies with AI-assisted 
             development, demonstrating a fully functional blog platform with features like:
           </Typography>
           <Typography variant="body1" component="div">

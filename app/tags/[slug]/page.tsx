@@ -31,6 +31,7 @@ async function getPostsByTag(slug: string) {
         select: {
           name: true,
           email: true,
+          image: true,
         },
       },
       tags: {

@@ -32,7 +32,7 @@ export default function SettingsPage() {
         data.forEach((setting: any) => {
           settingsObj[setting.key] = setting.value;
         });
-        setSettings({ ...settings, ...settingsObj });
+        setSettings((prevSettings) => ({ ...prevSettings, ...settingsObj }));
       });
   }, []);
 
@@ -73,7 +73,7 @@ export default function SettingsPage() {
           Site Settings
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Configure your site's basic information. These settings appear in the site title, metadata, and footer.
+          Configure your site&apos;s basic information. These settings appear in the site title, metadata, and footer.
         </Typography>
       </Box>
 

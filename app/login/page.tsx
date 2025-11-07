@@ -135,7 +135,7 @@ export default function LoginPage() {
 
           <Box sx={{ mt: 2, textAlign: 'center' }}>
             <Typography variant="body2">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <MuiLink component={Link} href="/register" underline="hover">
                 Sign up
               </MuiLink>

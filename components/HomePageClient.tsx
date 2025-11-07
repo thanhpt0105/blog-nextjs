@@ -10,7 +10,7 @@ interface Post {
   id: string;
   title: string;
   slug: string;
-  excerpt: string;
+  excerpt: string | null;
   coverImage: string | null;
   publishedAt: Date | null;
   author: {

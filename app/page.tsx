@@ -5,6 +5,12 @@ import LazyLoadHomePage from '@/components/LazyLoadHomePage';
 import { getSiteSettings } from '@/lib/settings';
 import { PostRepository, TagRepository } from '@/lib/repositories';
 
+// Enable dynamic rendering for search params (user filters)
+export const dynamic = 'force-dynamic';
+
+// No revalidation needed since we're using Redis cache and force-dynamic
+// The Redis cache handles freshness with its own TTL
+
 interface HomePageProps {
   searchParams: {
     page?: string;

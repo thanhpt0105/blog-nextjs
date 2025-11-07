@@ -1,21 +1,13 @@
 import { Container, Typography, Box, Grid, Card, CardContent, CardActionArea, Chip } from '@mui/material';
 import { Label } from '@mui/icons-material';
 import Link from 'next/link';
-import { prisma } from '@/lib/prisma';
+import { TagRepository } from '@/lib/repositories';
+
+// Enable ISR with 5 minute revalidation for tags page
+export const revalidate = 300;
 
 async function getTagsWithPostCount() {
-  const tags = await prisma.tag.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      posts: {
-        where: {
-          post: {
-            published: true,
-          },
-        },
-      },
-    },
-  });
+  const tags = await TagRepository.getAllTags();
 
   return tags.map((tag: any) => ({
     ...tag,

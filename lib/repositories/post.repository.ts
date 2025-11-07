@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { getCachedPosts, setCachedPosts, CACHE_TTL } from '@/lib/cache';
 
 export interface GetPostsParams {
   page?: number;
@@ -26,7 +27,7 @@ export class PostRepository {
   /**
    * Get paginated posts with filters
    */
-  static async getPosts(params: GetPostsParams = {}) {
+  static async getPosts(params: GetPostsParams = {}): Promise<PaginatedResult<any>> {
     const {
       page = 1,
       limit = 10,
@@ -36,6 +37,17 @@ export class PostRepository {
       tagIds,
       search,
     } = params;
+
+    // Generate cache key for this query
+    const cacheKey = `posts:page:${page}:limit:${limit}:published:${published}:author:${authorId || 'all'}:tag:${tagId || 'all'}:tags:${tagIds?.join(',') || 'all'}:search:${search || 'none'}`;
+    
+    // Try cache first for published posts without complex filters
+    if (published && !authorId && !search) {
+      const cached = await getCachedPosts(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    }
 
     const skip = (page - 1) * limit;
 
@@ -105,7 +117,7 @@ export class PostRepository {
 
     const totalPages = Math.ceil(total / limit);
 
-    return {
+    const result = {
       data: posts,
       pagination: {
         page,
@@ -116,6 +128,13 @@ export class PostRepository {
         hasPrev: page > 1,
       },
     };
+
+    // Cache the result for published posts without complex filters
+    if (published && !authorId && !search) {
+      await setCachedPosts(cacheKey, result, CACHE_TTL.MEDIUM);
+    }
+
+    return result;
   }
 
   /**

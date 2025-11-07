@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "db:start": "docker-compose up -d postgres",
     "db:stop": "docker-compose stop postgres",
     "db:restart": "docker-compose restart postgres",

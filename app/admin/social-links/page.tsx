@@ -179,12 +179,22 @@ export default function SocialLinksPage() {
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4">Social Links</Typography>
+      <Box sx={{ 
+        mb: 4, 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        gap: 2,
+      }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+          Social Links
+        </Typography>
         <Button
           variant="contained"
           startIcon={<Add />}
           onClick={() => handleOpenDialog()}
+          sx={{ width: { xs: '100%', sm: 'auto' } }}
         >
           Add Link
         </Button>
@@ -202,14 +212,14 @@ export default function SocialLinksPage() {
         </Alert>
       )}
 
-      <Paper sx={{ p: 3 }}>
-        <TableContainer>
-          <Table>
+      <Paper sx={{ p: { xs: 2, sm: 3 } }}>
+        <TableContainer sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: { xs: 300, sm: 650 } }}>
             <TableHead>
               <TableRow>
-                <TableCell width={50}></TableCell>
+                <TableCell width={50} sx={{ display: { xs: 'none', sm: 'table-cell' } }}></TableCell>
                 <TableCell>Platform</TableCell>
-                <TableCell>URL</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>URL</TableCell>
                 <TableCell>Visible</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
@@ -218,7 +228,7 @@ export default function SocialLinksPage() {
               {links.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ py: 4, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                       No social links yet. Add your first link to get started!
                     </Typography>
                   </TableCell>
@@ -226,38 +236,44 @@ export default function SocialLinksPage() {
               ) : (
                 links.map((link) => (
                   <TableRow key={link.id} hover>
-                    <TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                       <DragIndicator color="action" />
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {getPlatformIcon(link.platform)}
-                        {link.platform}
+                        <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                          {link.platform}
+                        </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
                         {link.url}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      {link.visible ? '✓ Visible' : '✗ Hidden'}
+                      <Typography variant="body2" sx={{ fontSize: { xs: '0.625rem', sm: '0.75rem' } }}>
+                        {link.visible ? '✓ Visible' : '✗ Hidden'}
+                      </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenDialog(link)}
-                        color="primary"
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(link.id)}
-                        color="error"
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
+                      <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, justifyContent: 'flex-end' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDialog(link)}
+                          color="primary"
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDelete(link.id)}
+                          color="error"
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))

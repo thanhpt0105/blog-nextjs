@@ -83,9 +83,19 @@ export default function AdminPostsClient({ posts, tags, pagination, initialTagId
   return (
     <>
       {/* Tag Filter */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <FilterList color="action" />
+      <Paper sx={{ p: { xs: 1.5, sm: 2 }, mb: 3 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' }, 
+          gap: 2 
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FilterList color="action" />
+            <Typography variant="body2" sx={{ display: { xs: 'inline', sm: 'none' } }}>
+              Filter
+            </Typography>
+          </Box>
           <Autocomplete
             options={tags}
             getOptionLabel={(option) => `${option.name} (${option.posts.length} posts)`}
@@ -96,6 +106,7 @@ export default function AdminPostsClient({ posts, tags, pagination, initialTagId
                 {...params}
                 label="Filter by Tag"
                 placeholder="Select a tag to filter posts"
+                size="small"
               />
             )}
             sx={{ flexGrow: 1 }}
@@ -106,6 +117,8 @@ export default function AdminPostsClient({ posts, tags, pagination, initialTagId
               label={`Showing ${pagination.total} of ${tags.find(t => !selectedTag || t.id !== selectedTag.id) ? pagination.total : 'all'} posts`}
               color="primary"
               variant="outlined"
+              size="small"
+              sx={{ display: { xs: 'none', sm: 'flex' } }}
             />
           )}
         </Box>
@@ -116,8 +129,15 @@ export default function AdminPostsClient({ posts, tags, pagination, initialTagId
 
       {/* Pagination - now works with tag filter */}
       {pagination.totalPages > 1 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 4, gap: 2 }}>
-          <Typography variant="body2" color="text.secondary">
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          mt: 4, 
+          gap: 2 
+        }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
             Page {pagination.page} of {pagination.totalPages} ({pagination.total} total posts{selectedTag ? ` with tag "${selectedTag.name}"` : ''})
           </Typography>
           <Pagination
@@ -127,6 +147,12 @@ export default function AdminPostsClient({ posts, tags, pagination, initialTagId
             color="primary"
             showFirstButton
             showLastButton
+            size="small"
+            sx={{ 
+              '& .MuiPaginationItem-root': { 
+                fontSize: { xs: '0.75rem', sm: '0.875rem' } 
+              } 
+            }}
           />
         </Box>
       )}
@@ -134,7 +160,7 @@ export default function AdminPostsClient({ posts, tags, pagination, initialTagId
       {/* Show info when no pagination */}
       {pagination.totalPages <= 1 && (
         <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
             Showing {pagination.total} post{pagination.total !== 1 ? 's' : ''}{selectedTag ? ` with tag "${selectedTag.name}"` : ''}
           </Typography>
         </Box>

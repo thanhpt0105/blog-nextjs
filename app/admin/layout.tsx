@@ -75,6 +75,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   const handleSignOut = async () => {
     handleClose();
+    setMobileOpen(false);
     await signOut({ callbackUrl: '/login' });
   };
 
@@ -86,6 +87,35 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </Typography>
       </Toolbar>
       <Divider />
+      
+      {/* User info section for mobile */}
+      {session?.user && (
+        <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+          <List>
+            <ListItem>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                <Avatar 
+                  sx={{ width: 40, height: 40 }}
+                  src={session.user.image || undefined}
+                  alt={session.user.name || session.user.email || 'User'}
+                >
+                  {!session.user.image && (session.user.name || session.user.email || 'U').charAt(0).toUpperCase()}
+                </Avatar>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="body2" fontWeight={600} noWrap>
+                    {session.user.name || session.user.email}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {session.user.email}
+                  </Typography>
+                </Box>
+              </Box>
+            </ListItem>
+          </List>
+          <Divider />
+        </Box>
+      )}
+      
       <List>
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
@@ -95,6 +125,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 component={Link}
                 href={item.href}
                 selected={isActive}
+                onClick={() => setMobileOpen(false)}
                 sx={{
                   '&.Mui-selected': {
                     backgroundColor: 'primary.light',
@@ -117,6 +148,33 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           );
         })}
       </List>
+      
+      {/* User actions for mobile */}
+      <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+        <Divider />
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton
+              component={Link}
+              href="/"
+              onClick={() => setMobileOpen(false)}
+            >
+              <ListItemIcon>
+                <Public fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="View Site" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleSignOut}>
+              <ListItemIcon>
+                <Logout fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Sign Out" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Box>
     </Box>
   );
 
@@ -139,25 +197,21 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography 
+            variant="h6" 
+            noWrap 
+            component="div" 
+            sx={{ 
+              flexGrow: 1,
+              fontSize: { xs: '1rem', sm: '1.25rem' },
+            }}
+          >
             {menuItems.find((item) => item.href === pathname)?.text || 'Admin'}
           </Typography>
 
           {session?.user && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Chip
-                label={session.user.role}
-                size="small"
-                color={session.user.role === 'ADMIN' ? 'error' : session.user.role === 'EDITOR' ? 'primary' : 'default'}
-              />
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
+            <>
+              <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center' }}>
                 <Avatar 
                   src={session.user.image || undefined} 
                   alt={session.user.name || session.user.email || 'User'}
@@ -165,8 +219,32 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 >
                   {!session.user.image && (session.user.name || session.user.email || 'U').charAt(0).toUpperCase()}
                 </Avatar>
-              </IconButton>
-            </Box>
+              </Box>
+              <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 2 }}>
+                <Chip
+                  label={session.user.role}
+                  size="small"
+                  color={session.user.role === 'ADMIN' ? 'error' : session.user.role === 'EDITOR' ? 'primary' : 'default'}
+                />
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenu}
+                  color="inherit"
+                  sx={{ p: 1 }}
+                >
+                  <Avatar 
+                    src={session.user.image || undefined} 
+                    alt={session.user.name || session.user.email || 'User'}
+                    sx={{ width: 32, height: 32 }}
+                  >
+                    {!session.user.image && (session.user.name || session.user.email || 'U').charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
+              </Box>
+            </>
           )}
           <Menu
             id="menu-appbar"
@@ -182,6 +260,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             }}
             open={Boolean(anchorEl)}
             onClose={handleClose}
+            sx={{ display: { xs: 'none', sm: 'block' } }}
           >
             <MenuItem disabled>
               <Typography variant="body2" color="text.secondary">
@@ -249,8 +328,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 2, sm: 3 },
           width: { sm: `calc(100% - ${drawerWidth}px)` },
+          minHeight: '100vh',
         }}
       >
         <Toolbar />

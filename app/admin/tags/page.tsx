@@ -187,24 +187,34 @@ export default function TagsPage() {
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4">Tags</Typography>
+      <Box sx={{ 
+        mb: 4, 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        gap: 2,
+      }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+          Tags
+        </Typography>
         <Button
           variant="contained"
           startIcon={<Add />}
           onClick={() => handleOpenDialog()}
+          sx={{ width: { xs: '100%', sm: 'auto' } }}
         >
           New Tag
         </Button>
       </Box>
 
-      <Paper sx={{ p: 3 }}>
-        <TableContainer>
-          <Table>
+      <Paper sx={{ p: { xs: 2, sm: 3 } }}>
+        <TableContainer sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: { xs: 300, sm: 650 } }}>
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
-                <TableCell>Slug</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Slug</TableCell>
                 <TableCell>Posts</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
@@ -213,18 +223,19 @@ export default function TagsPage() {
               {tags.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
-                    <Box sx={{ py: 8 }}>
-                      <Label sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-                      <Typography variant="h6" color="text.secondary" gutterBottom>
+                    <Box sx={{ py: { xs: 4, sm: 8 } }}>
+                      <Label sx={{ fontSize: { xs: 32, sm: 48 }, color: 'text.secondary', mb: 2 }} />
+                      <Typography variant="h6" color="text.secondary" gutterBottom sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                         No tags yet
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" paragraph>
+                      <Typography variant="body2" color="text.secondary" paragraph sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                         Create your first tag to organize your posts!
                       </Typography>
                       <Button
                         variant="contained"
                         startIcon={<Add />}
                         onClick={() => handleOpenDialog()}
+                        size="small"
                       >
                         Create Tag
                       </Button>
@@ -240,18 +251,23 @@ export default function TagsPage() {
                         size="small"
                         variant="outlined"
                         icon={<Label />}
+                        sx={{ fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                       <Typography variant="body2" color="text.secondary">
                         {tag.slug}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Chip label={tag.postCount} size="small" />
+                      <Chip 
+                        label={tag.postCount} 
+                        size="small"
+                        sx={{ fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
+                      />
                     </TableCell>
                     <TableCell align="right">
-                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                      <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, justifyContent: 'flex-end' }}>
                         <IconButton
                           size="small"
                           color="primary"

@@ -44,13 +44,23 @@ export default async function PostsPage({ searchParams }: AdminPostsPageProps) {
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4">Blog Posts</Typography>
+      <Box sx={{ 
+        mb: 4, 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        gap: 2,
+      }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+          Blog Posts
+        </Typography>
         <Button
           variant="contained"
           startIcon={<Add />}
           component={Link}
           href="/admin/posts/new"
+          sx={{ width: { xs: '100%', sm: 'auto' } }}
         >
           New Post
         </Button>

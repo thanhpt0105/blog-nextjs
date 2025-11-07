@@ -100,12 +100,19 @@ export default async function AdminPage() {
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ 
+        mb: 4, 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        gap: 2,
+      }}>
         <Box>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
             Welcome back, {session.user.name}!
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
             Here's what's happening with your blog today.
           </Typography>
         </Box>
@@ -115,6 +122,9 @@ export default async function AdminPage() {
           component={Link}
           href="/admin/posts/new"
           size="large"
+          sx={{ 
+            width: { xs: '100%', sm: 'auto' },
+          }}
         >
           New Post
         </Button>
@@ -155,22 +165,29 @@ export default async function AdminPage() {
       </Grid>
 
       {/* Recent Posts */}
-      <Paper sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 } }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between', 
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          mb: 3,
+          gap: 2,
+        }}>
           <Typography variant="h6">Recent Posts</Typography>
           <Button component={Link} href="/admin/posts" size="small">
             View All
           </Button>
         </Box>
 
-        <TableContainer>
-          <Table>
+        <TableContainer sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: { xs: 300, sm: 650 } }}>
             <TableHead>
               <TableRow>
                 <TableCell>Title</TableCell>
-                <TableCell>Author</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Author</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Created</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Created</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -187,21 +204,34 @@ export default async function AdminPage() {
                   <TableRow key={post.id} hover>
                     <TableCell>
                       <Link href={`/admin/posts/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <Typography variant="body2" sx={{ '&:hover': { color: 'primary.main' } }}>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            '&:hover': { color: 'primary.main' },
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                          }}
+                        >
                           {post.title}
                         </Typography>
                       </Link>
                     </TableCell>
-                    <TableCell>{post.author.name || post.author.email}</TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                      <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                        {post.author.name || post.author.email}
+                      </Typography>
+                    </TableCell>
                     <TableCell>
                       <Chip
                         label={post.published ? 'Published' : 'Draft'}
                         size="small"
                         color={post.published ? 'success' : 'default'}
+                        sx={{ fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
                       />
                     </TableCell>
-                    <TableCell>
-                      {new Date(post.createdAt).toLocaleDateString()}
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                      <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </Typography>
                     </TableCell>
                   </TableRow>
                 ))

@@ -86,16 +86,16 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
 
   return (
     <>
-      <Paper sx={{ p: 3 }}>
-        <TableContainer>
-          <Table>
+      <Paper sx={{ p: { xs: 2, sm: 3 } }}>
+        <TableContainer sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: { xs: 300, sm: 650 } }}>
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Email</TableCell>
                 <TableCell>Role</TableCell>
-                <TableCell>Posts</TableCell>
-                <TableCell>Joined</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Posts</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Joined</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -109,23 +109,36 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
                       ) : (
                         <Person fontSize="small" color="action" />
                       )}
-                      {user.name || 'No name'}
+                      <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                        {user.name || 'No name'}
+                      </Typography>
                     </Box>
                   </TableCell>
-                  <TableCell>{user.email}</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                      {user.email}
+                    </Typography>
+                  </TableCell>
                   <TableCell>
                     <Chip
                       label={user.role}
                       size="small"
                       color={user.role === 'ADMIN' ? 'error' : 'default'}
+                      sx={{ fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
                     />
                   </TableCell>
-                  <TableCell>{user._count.posts}</TableCell>
-                  <TableCell>
-                    {new Date(user.createdAt).toLocaleDateString()}
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                      {user._count.posts}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                    <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, justifyContent: 'flex-end' }}>
                       <IconButton
                         size="small"
                         component={Link}

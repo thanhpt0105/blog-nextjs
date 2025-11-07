@@ -100,7 +100,7 @@ export default function PostsTable({ posts }: PostsTableProps) {
 
   return (
     <>
-      <Paper sx={{ p: 3 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 } }}>
         <Box sx={{ mb: 3 }}>
           <TextField
             placeholder="Search posts..."
@@ -118,14 +118,14 @@ export default function PostsTable({ posts }: PostsTableProps) {
           />
         </Box>
 
-        <TableContainer>
-          <Table>
+        <TableContainer sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: { xs: 300, sm: 650 } }}>
             <TableHead>
               <TableRow>
                 <TableCell>Title</TableCell>
-                <TableCell>Author</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Author</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Created</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Created</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -144,7 +144,7 @@ export default function PostsTable({ posts }: PostsTableProps) {
                 filteredPosts.map((post) => (
                   <TableRow key={post.id} hover>
                     <TableCell>
-                      <Typography variant="body2" fontWeight={500}>
+                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                         {post.title}
                       </Typography>
                       {post.tags.length > 0 && (
@@ -155,21 +155,22 @@ export default function PostsTable({ posts }: PostsTableProps) {
                               label={postTag.tag.name}
                               size="small"
                               variant="outlined"
+                              sx={{ fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
                             />
                           ))}
                         </Box>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Avatar 
-                          sx={{ width: 32, height: 32 }}
+                          sx={{ width: 28, height: 28 }}
                           src={post.author.image || undefined}
                           alt={post.author.name || post.author.email}
                         >
                           {!post.author.image && (post.author.name || post.author.email).charAt(0).toUpperCase()}
                         </Avatar>
-                        <Typography variant="body2">
+                        <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
                           {post.author.name || post.author.email}
                         </Typography>
                       </Box>
@@ -179,13 +180,16 @@ export default function PostsTable({ posts }: PostsTableProps) {
                         label={post.published ? 'Published' : 'Draft'}
                         size="small"
                         color={post.published ? 'success' : 'default'}
+                        sx={{ fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
                       />
                     </TableCell>
-                    <TableCell>
-                      {new Date(post.createdAt).toLocaleDateString()}
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                      <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                      <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, justifyContent: 'flex-end' }}>
                         {post.published && (
                           <IconButton
                             size="small"
@@ -193,6 +197,7 @@ export default function PostsTable({ posts }: PostsTableProps) {
                             href={`/posts/${post.slug}`}
                             target="_blank"
                             title="View post"
+                            sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
                           >
                             <Visibility fontSize="small" />
                           </IconButton>

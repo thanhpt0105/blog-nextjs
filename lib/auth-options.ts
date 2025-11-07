@@ -54,6 +54,52 @@ export const authConfig: NextAuthConfig = {
     signIn: '/login',
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Handle OAuth sign-in (Google)
+      if (account?.provider === 'google') {
+        try {
+          // Check if user already exists
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+          });
+
+          if (existingUser) {
+            // User exists - update their info if needed
+            await prisma.user.update({
+              where: { email: user.email! },
+              data: {
+                name: user.name || existingUser.name,
+                image: user.image || existingUser.image,
+              },
+            });
+            // Attach the existing user's role to the user object
+            user.id = existingUser.id;
+            user.role = existingUser.role;
+          } else {
+            // Create new user with USER role by default
+            const newUser = await prisma.user.create({
+              data: {
+                email: user.email!,
+                name: user.name || 'Google User',
+                image: user.image,
+                role: 'USER',
+                password: null, // OAuth users don't have passwords
+              },
+            });
+            user.id = newUser.id;
+            user.role = newUser.role;
+          }
+
+          return true;
+        } catch (error) {
+          console.error('Error during Google sign-in:', error);
+          return false;
+        }
+      }
+
+      // For credentials provider, just allow sign-in
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;

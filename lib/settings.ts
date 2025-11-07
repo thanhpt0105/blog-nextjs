@@ -5,6 +5,7 @@ export interface SiteSettings {
   site_name: string;
   site_description: string;
   posts_per_page: string;
+  site_icon?: string;
 }
 
 const SETTINGS_CACHE_KEY = 'site:settings';
@@ -24,6 +25,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       site_name: 'My Blog',
       site_description: 'A personal blog featuring technical articles, tutorials, and thoughts on software development.',
       posts_per_page: '10',
+      site_icon: '',
     };
 
     settings.forEach((setting: { key: string; value: string }) => {
@@ -44,6 +46,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       site_name: 'My Blog',
       site_description: 'A personal blog featuring technical articles, tutorials, and thoughts on software development.',
       posts_per_page: '10',
+      site_icon: '',
     };
   }
 }

@@ -15,6 +15,12 @@ import {
   Delete as DeleteIcon,
   PhotoCamera as PhotoCameraIcon,
 } from '@mui/icons-material';
+import { 
+  compressSiteIcon, 
+  compressPostImage, 
+  compressContentImage,
+  getCompressionInfo 
+} from '@/lib/utils/image-compress';
 
 interface ImageUploadProps {
   type: 'profile' | 'cover' | 'content';
@@ -48,13 +54,27 @@ export default function ImageUpload({
       return 'Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.';
     }
 
-    // Check file size (5MB)
-    const maxSize = 5 * 1024 * 1024;
+    // Check file size (10MB before compression)
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      return 'File size exceeds 5MB limit.';
+      return 'File size exceeds 10MB limit.';
     }
 
     return null;
+  };
+
+  const compressFile = async (file: File): Promise<Blob> => {
+    // Choose compression method based on type
+    switch (type) {
+      case 'profile':
+        return compressSiteIcon(file);
+      case 'cover':
+        return compressPostImage(file);
+      case 'content':
+        return compressContentImage(file);
+      default:
+        return compressContentImage(file);
+    }
   };
 
   const handleFileSelect = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -72,13 +92,20 @@ export default function ImageUpload({
     setUploading(true);
 
     try {
+      // Compress the image
+      const compressedBlob = await compressFile(file);
+      
+      // Log compression info
+      const info = getCompressionInfo(file.size, compressedBlob.size);
+      console.log(`Image compressed (${type}):`, info);
+
       // Create preview
-      const previewUrl = URL.createObjectURL(file);
+      const previewUrl = URL.createObjectURL(compressedBlob);
       setPreview(previewUrl);
 
       // Upload to server
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', compressedBlob, file.name);
       formData.append('type', type);
 
       const response = await fetch('/api/upload', {
@@ -261,7 +288,7 @@ export default function ImageUpload({
               Click to upload cover image
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Max 5MB • JPEG, PNG, GIF, WebP
+              Max 10MB • Auto-compressed • JPEG, PNG, GIF, WebP
             </Typography>
           </Box>
         )}

@@ -20,7 +20,7 @@ const getCachedSettings = unstable_cache(
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getCachedSettings();
 
-  return {
+  const metadata: Metadata = {
     title: {
       default: `${settings.site_name} - Personal Thoughts & Technical Articles`,
       template: `%s | ${settings.site_name}`,
@@ -42,6 +42,16 @@ export async function generateMetadata(): Promise<Metadata> {
       description: settings.site_description,
     },
   };
+
+  // Add site icon if configured
+  if (settings.site_icon) {
+    metadata.icons = {
+      icon: settings.site_icon,
+      apple: settings.site_icon,
+    };
+  }
+
+  return metadata;
 }
 
 export default async function RootLayout({

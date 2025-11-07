@@ -5,11 +5,27 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - preview
+      skip_tests:
+        description: 'Skip tests and checks'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   # Code Quality Checks
   lint-and-typecheck:
     runs-on: ubuntu-latest
+    if: ${{ !inputs.skip_tests }}
     
     steps:
       - name: Checkout code
@@ -34,6 +50,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
+    if: ${{ always() && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped') }}
     
     steps:
       - name: Checkout code
@@ -83,7 +100,9 @@ jobs:
   deploy-production:
     runs-on: ubuntu-latest
     needs: [build, security-audit]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: |
+      (github.ref == 'refs/heads/main' && github.event_name == 'push') ||
+      (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
     
     steps:
       - name: Checkout code
@@ -102,7 +121,9 @@ jobs:
   deploy-preview:
     runs-on: ubuntu-latest
     needs: [build]
-    if: github.event_name == 'pull_request'
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'workflow_dispatch' && inputs.environment == 'preview')
     
     steps:
       - name: Checkout code

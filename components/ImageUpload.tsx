@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, ChangeEvent } from 'react';
+import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import {
   Box,
   Button,
@@ -35,6 +35,11 @@ export default function ImageUpload({
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync preview with currentImage prop
+  useEffect(() => {
+    setPreview(currentImage || null);
+  }, [currentImage]);
 
   const validateFile = (file: File): string | null => {
     // Check file type
